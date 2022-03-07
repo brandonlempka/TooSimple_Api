@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TooSimple_Api", "TooSimple_Api\TooSimple_Api.csproj", "{0CB40B2D-CF46-4905-83D6-FBE9E7A03764}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TooSimple_Database", "TooSimple_Database\TooSimple_Database.csproj", "{58F68A4E-1DC9-42D3-AECA-7D64566529D5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0CB40B2D-CF46-4905-83D6-FBE9E7A03764}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CB40B2D-CF46-4905-83D6-FBE9E7A03764}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CB40B2D-CF46-4905-83D6-FBE9E7A03764}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CB40B2D-CF46-4905-83D6-FBE9E7A03764}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58F68A4E-1DC9-42D3-AECA-7D64566529D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58F68A4E-1DC9-42D3-AECA-7D64566529D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58F68A4E-1DC9-42D3-AECA-7D64566529D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58F68A4E-1DC9-42D3-AECA-7D64566529D5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {06387A83-80AD-4DBF-A738-C69B3D1BC75A}
+	EndGlobalSection
+EndGlobal
