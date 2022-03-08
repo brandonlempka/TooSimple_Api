@@ -14,7 +14,12 @@ WORKDIR "/src/TooSimple_Api"
 RUN dotnet build "TooSimple_Api.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "TooSimple_Api.csproj" -c Release -o /app/publish -r linux-arm
+RUN dotnet publish server.sln \
+    -c Release \
+    -o dist \
+    -r linux-arm64 \
+    --no-restore \
+    --self-contained false
 
 FROM base AS final
 WORKDIR /app

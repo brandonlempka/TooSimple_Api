@@ -1,5 +1,5 @@
-using FluentMigrator.Runner;
-using TooSimple_Database.Migrations;
+using Microsoft.EntityFrameworkCore;
+using TooSimple_Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +10,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+string dbConnectionString = builder.Configuration.GetConnectionString("TooSimpleMySql");
+builder.Services.AddDbContext<TooSimpleDatabaseContext>(options =>
+{
+    options.UseMySql(dbConnectionString, ServerVersion.AutoDetect(dbConnectionString));
+});
+
+builder.Services.AddTransient<ITestingEf, TestingEf>();
 // Database migrations.
 //builder.Services.AddFluentMigratorCore()
 //    .ConfigureRunner(runner => runner
