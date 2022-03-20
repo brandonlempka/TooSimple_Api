@@ -1,4 +1,6 @@
+using TooSimple_DataAccessors.Plaid.TokenExchange;
 using TooSimple_Database;
+using TooSimple_Managers.Plaid.TokenExchange;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +13,8 @@ builder.Services.AddSwaggerGen();
 
 string dbConnectionString = builder.Configuration.GetConnectionString("TooSimpleMySql");
 
-builder.Services.AddTransient<ITestingEf, TestingEf>();
+builder.Services.AddTransient<ITokenExchangeAccessor, TokenExchangeAccessor>();
+builder.Services.AddTransient<ITokenExchangeManager, TokenExchangeManager>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

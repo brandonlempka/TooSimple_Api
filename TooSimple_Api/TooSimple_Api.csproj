@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TooSimple_DataAccessors\TooSimple_DataAccessors.csproj" />
     <ProjectReference Include="..\TooSimple_Database\TooSimple_Database.csproj" />
+    <ProjectReference Include="..\TooSimple_Managers\TooSimple_Managers.csproj" />
   </ItemGroup>
 
 </Project>
