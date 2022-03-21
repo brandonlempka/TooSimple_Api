@@ -20,15 +20,15 @@ namespace TooSimple_DataAccessors.Plaid.TokenExchange
         /// <returns>Response body of plaid request.</returns>
         public async Task<CreateLinkTokenResponseModel> CreateLinkTokenAsync(string userId)
         {
-            CreateLinkTokenRequestModel? request = new(userId);
+            CreateLinkTokenRequestModel request = new(userId);
 
-            string? json = JsonSerializer.Serialize(request);
-            StringContent? stringContent = new(
+            string json = JsonSerializer.Serialize(request);
+            StringContent stringContent = new(
                 json,
                 Encoding.UTF8, 
                 "application/json");
 
-            HttpResponseMessage? response = await _httpClient.PostAsync(
+            HttpResponseMessage response = await _httpClient.PostAsync(
                 $"{PlaidSettings.BaseUrl}/link/token/create",
                 stringContent);
 

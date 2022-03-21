@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using TooSimple_DataAccessors.Database.Accounts;
+using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_DataAccessors.Plaid.TokenExchange;
 using TooSimple_Database;
 using TooSimple_Database.Entities;
+using TooSimple_Managers.Plaid.AccountUpdate;
+using TooSimple_Poco.Models.Database;
 
 namespace TooSimple_Api.Controllers
 {
@@ -10,9 +14,12 @@ namespace TooSimple_Api.Controllers
     public class WeatherForecastController : ControllerBase
     {
         private ITokenExchangeAccessor _testingAccessor;
-        public WeatherForecastController(ITokenExchangeAccessor tokenExchangeAccessor)
+        private IAccountUpdateManager _accountUpdateAccessor;
+        public WeatherForecastController(ITokenExchangeAccessor tokenExchangeAccessor,
+            IAccountUpdateManager accountUpdateAccessor)
         {
             _testingAccessor = tokenExchangeAccessor;
+            _accountUpdateAccessor = accountUpdateAccessor;
         }
 
         private static readonly string[] Summaries = new[]
@@ -21,25 +28,12 @@ namespace TooSimple_Api.Controllers
     };
 
 
-        //[HttpGet(Name = "GetWeatherForecast")]
-        //public IEnumerable<WeatherForecast> Get()
-        //{
-        //    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        //    {
-        //        Date = DateTime.Now.AddDays(index),
-        //        TemperatureC = Random.Shared.Next(-20, 55),
-        //        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        //    })
-        //    .ToArray();
-        //}
-
-        //[HttpGet(Name = "Test")]
-        //public async Task<Account> TestEf()
-        //{
-        //    var newTest = await _testingAccessor.CreateLinkTokenAsync("test");
-        //    var test = await _testingEf.GetData();
-        //    return test;
-        //}
-
+        [HttpGet(Name = "GetWeatherForecast")]
+        public async Task<bool> Get()
+        {
+            
+            var test = await _accountUpdateAccessor.UpdateAccountBalancesAsync("test");
+            return test;
+        }
     }
 }

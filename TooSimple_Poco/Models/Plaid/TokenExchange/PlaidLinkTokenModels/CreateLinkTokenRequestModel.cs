@@ -1,16 +1,11 @@
 ﻿using System.Text.Json.Serialization;
+using TooSimple_Poco.Models.Plaid.Shared;
 using TooSimple_Poco.Settings;
 
 namespace TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels
 {
-    public class CreateLinkTokenRequestModel
+    public class CreateLinkTokenRequestModel : PlaidRequestModel
     {
-        [JsonPropertyName("client_id")]
-        public string ClientId { get; set; } = string.Empty;
-        [JsonPropertyName("secret")]
-        public string PlaidSecret { get; set; } = string.Empty;
-        [JsonPropertyName("client_name")]
-        public string ClientName { get; set; } = string.Empty;
         [JsonPropertyName("country_codes")]
         public string[] CountryCodes { get; set; } = Array.Empty<string>();
         [JsonPropertyName("language")]
@@ -19,11 +14,11 @@ namespace TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels
         public string[] Products { get; set; } = Array.Empty<string>();
         [JsonPropertyName("user")]
         public CreateLinkTokenUserModel User { get; set; }
+        [JsonPropertyName("client_name")]
+        public string ClientName { get; set; } = string.Empty;
 
-        public CreateLinkTokenRequestModel(string userId)
+        public CreateLinkTokenRequestModel(string userId) : base()
         {
-            ClientId = PlaidSettings.ClientId;
-            PlaidSecret = PlaidSettings.Secret;
             ClientName = PlaidSettings.ClientName;
             CountryCodes = PlaidSettings.Countries;
             Language = PlaidSettings.Language;
