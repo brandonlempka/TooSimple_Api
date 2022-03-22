@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_DataAccessors.Plaid.TokenExchange;
@@ -34,6 +35,12 @@ namespace TooSimple_Api.Controllers
             
             var test = await _accountUpdateAccessor.UpdateAccountBalancesAsync("test");
             return test;
+        }
+
+        [HttpPost]
+        public void Testing([FromBody]JsonElement json)
+        {
+            var test = json;
         }
     }
 }

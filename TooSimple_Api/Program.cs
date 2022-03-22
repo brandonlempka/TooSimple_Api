@@ -1,4 +1,5 @@
 using TooSimple_DataAccessors.Database.Accounts;
+using TooSimple_DataAccessors.Database.Logging;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_DataAccessors.Plaid.TokenExchange;
 using TooSimple_Database;
@@ -19,6 +20,7 @@ string dbConnectionString = builder.Configuration.GetConnectionString("TooSimple
 builder.Services.AddTransient<ITokenExchangeAccessor, TokenExchangeAccessor>();
 builder.Services.AddTransient<IAccountUpdateAccessor, AccountUpdateAccessor>();
 builder.Services.AddTransient<IAccountAccessor, AccountAccessor>();
+builder.Services.AddTransient<ILoggingAccessor, LoggingAccessor>();
 
 builder.Services.AddTransient<ITokenExchangeManager, TokenExchangeManager>();
 builder.Services.AddTransient<IAccountUpdateManager, AccountUpdateManager>();

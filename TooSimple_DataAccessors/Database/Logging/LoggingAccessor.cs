@@ -1,0 +1,54 @@
+﻿using Dapper;
+using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
+using System.Data;
+
+namespace TooSimple_DataAccessors.Database.Logging
+{
+    public class LoggingAccessor : ILoggingAccessor
+    {
+        private readonly string _connectionString;
+
+        public LoggingAccessor(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("TooSimpleMySql");
+        }
+
+        public async Task<bool> LogMessageAsync(string? errorCode, string message)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (IDbTransaction transaction = connection.BeginTransaction())
+                {
+                    string query = @"INSERT INTO Logging
+                                    (Code, Message) 
+                                    VALUES
+                                    (@Code,
+                                    @Message)";
+
+                    try
+                    {
+                        await connection.ExecuteAsync(
+                            query,
+                            new
+                            {
+                                Code = errorCode,
+                                Message = message
+                            },
+                            transaction);
+
+                        transaction.Commit();
+                        return true;
+                    }
+
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+}
