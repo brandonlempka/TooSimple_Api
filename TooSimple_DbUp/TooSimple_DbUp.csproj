@@ -12,6 +12,7 @@
     <None Remove="Scripts\02-CreateAccountsTable.sql" />
     <None Remove="Scripts\03-AddGoalsTable.sql" />
     <None Remove="Scripts\04-AddMissingColumn.sql" />
+    <None Remove="Scripts\05-AddItemIdToAccounts.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +20,7 @@
     <EmbeddedResource Include="Scripts\01-Create userAccount Table.sql" />
     <EmbeddedResource Include="Scripts\03-AddGoalsTable.sql" />
     <EmbeddedResource Include="Scripts\04-AddMissingColumn.sql" />
+    <EmbeddedResource Include="Scripts\05-AddItemIdToAccounts.sql" />
   </ItemGroup>
 
   <ItemGroup>

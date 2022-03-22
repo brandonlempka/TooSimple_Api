@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using TooSimple_DataAccessors.Database.Logging;
+using TooSimple_Managers.Plaid.AccountUpdate;
 using TooSimple_Managers.Plaid.TokenExchange;
 using TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels;
 
@@ -10,17 +11,18 @@ namespace TooSimple_Api.Controllers
     /// Request handler for adding & updating plaid accounts.
     /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class PlaidController : ControllerBase
     {
         private readonly ITokenExchangeManager _tokenExchangeManager;
+        private readonly IAccountUpdateManager _accountUpdateManager;
         private readonly ILoggingAccessor _loggingAccessor;
 
         public PlaidController(ITokenExchangeManager tokenExchangeManager,
-            ILoggingAccessor loggingAccessor)
+            IAccountUpdateManager accountUpdateManager)
         {
             _tokenExchangeManager = tokenExchangeManager;
-            _loggingAccessor = loggingAccessor;
+            _accountUpdateManager = accountUpdateManager;
         }
 
         /// <summary>
@@ -28,7 +30,7 @@ namespace TooSimple_Api.Controllers
         /// </summary>
         /// <param name="userId">User's Too Simple ID.</param>
         /// <returns>Dto with link token.</returns>
-        [HttpGet("CreateLinkToken")]
+        [HttpGet("createLinkToken")]
         public async Task<CreateLinkTokenDto> CreateLinkToken(string userId)
         {
             return await _tokenExchangeManager.GetCreateLinkTokenAsync(userId);
@@ -38,13 +40,10 @@ namespace TooSimple_Api.Controllers
         /// Plaid sends this when there are new transactions to use.
         /// </summary>
         /// <param name="json"></param>
-        [HttpPost("NewTransactions")]
+        [HttpPost("newTransactions")]
         public async Task NewTransactions([FromBody] JsonElement json)
         {
-            //temporarily calling accessor directly
-            //to do fix this if it works
-            var test = await _loggingAccessor.LogMessageAsync(null, json.ToString());
-            var test2 = test;
+            var response = await _accountUpdateManager.UpdateAccountBalancesByItemIdAsync(json);
         }
     }
 }

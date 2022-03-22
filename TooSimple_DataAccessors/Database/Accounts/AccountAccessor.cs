@@ -93,5 +93,53 @@ namespace TooSimple_DataAccessors.Database.Accounts
                 return true;
             }
         }
+
+        /// <summary>
+        /// Locks or unlocks Plaid Account if credentials have expired.
+        /// </summary>
+        /// <param name="isLocked">
+        /// Boolean indicating whether to lock or unlock the account.
+        /// True = lock, false = unlock.
+        /// </param>
+        /// <param name="accountIds">
+        /// Account Ids to lock or unlock.
+        /// </param>
+        /// <returns>
+        /// Boolean indicating success.
+        /// </returns>
+        public async Task<bool> UpdateAccountRelogAsync(bool isLocked, string[] accountIds)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (IDbTransaction transaction = connection.BeginTransaction())
+                {
+                    string query = @"UPDATE PlaidAccounts 
+                                    SET IsPlaidRelogRequired = @IsLocked
+                                    WHERE PlaidAccountId = @Id";
+
+                    try
+                    {
+                        await connection.ExecuteAsync(
+                            query,
+                            new
+                            {
+                                IsLocked = isLocked,
+                                Id = accountIds
+                            },
+                            transaction);
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
     }
 }

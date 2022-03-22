@@ -1,7 +1,10 @@
-﻿namespace TooSimple_Managers.Plaid.AccountUpdate
+﻿using System.Text.Json;
+
+namespace TooSimple_Managers.Plaid.AccountUpdate
 {
     public interface IAccountUpdateManager
     {
-        Task<bool> UpdateAccountBalancesAsync(string userId);
+        Task<bool> UpdateAccountBalancesByUserIdAsync(string userId);
+        Task<bool> UpdateAccountBalancesByItemIdAsync(JsonElement json);
     }
 }

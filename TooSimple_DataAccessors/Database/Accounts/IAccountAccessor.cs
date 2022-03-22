@@ -7,6 +7,6 @@ namespace TooSimple_DataAccessors.Database.Accounts
     {
         Task<IEnumerable<PlaidAccountDataModel>> GetPlaidAccountsAsync(string userId);
         Task<bool> UpdateAccountBalancesAsync(AccountUpdateResponseModel responseModel);
-
+        Task<bool> UpdateAccountRelogAsync(bool isLocked, string[] accountIds);
     }
 }

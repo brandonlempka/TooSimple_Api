@@ -1,8 +1,11 @@
-﻿using TooSimple_DataAccessors.Database.Accounts;
+﻿using System.Text.Json;
+using TooSimple_DataAccessors.Database.Accounts;
+using TooSimple_DataAccessors.Database.Logging;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_Poco.Enums;
 using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.Plaid.AccountUpdate;
+using TooSimple_Poco.Models.Plaid.Webhooks;
 
 namespace TooSimple_Managers.Plaid.AccountUpdate
 {
@@ -10,13 +13,16 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
     {
         private readonly IAccountUpdateAccessor _accountUpdateAccessor;
         private readonly IAccountAccessor _accountAccessor;
+        private readonly ILoggingAccessor _loggingAccessor;
 
         public AccountUpdateManager(
             IAccountUpdateAccessor accountUpdateAccessor,
-            IAccountAccessor accountAccessor)
+            IAccountAccessor accountAccessor,
+            ILoggingAccessor loggingAccessor)
         {
             _accountUpdateAccessor = accountUpdateAccessor;
             _accountAccessor = accountAccessor;
+            _loggingAccessor = loggingAccessor;
         }
 
         /// <summary>
@@ -24,7 +30,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
         /// </summary>
         /// <param name="userId">Too Simple user Id to update.</param>
         /// <returns>Boolean indicating success.</returns>
-        public async Task<bool> UpdateAccountBalancesAsync(string userId)
+        public async Task<bool> UpdateAccountBalancesByUserIdAsync(string userId)
         {
             IEnumerable<PlaidAccountDataModel> plaidAccounts = await _accountAccessor.GetPlaidAccountsAsync(userId);
             if (plaidAccounts is null || !plaidAccounts.Any())
@@ -57,17 +63,29 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
 
                 if (plaidUpdateResponse.ErrorCode == PlaidErrorCodes.ITEM_LOGIN_REQUIRED.ToString())
                 {
-                    // to do handle relog requested things.
+                    bool response = await _accountAccessor.UpdateAccountRelogAsync(true, accountIds);
+                    if (!response)
+                        return false;
                 }
                 else
                 {
-
-                var response = _accountAccessor.UpdateAccountBalancesAsync(plaidUpdateResponse);
+                    bool response = await _accountAccessor.UpdateAccountBalancesAsync(plaidUpdateResponse);
                 }
-
-                var test = "123";
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// Calls plaid to update account balances.
+        /// </summary>
+        /// <param name="userId">Plaid accountId to update.</param>
+        /// <returns>Boolean indicating success.</returns>
+        public async Task<bool> UpdateAccountBalancesByItemIdAsync(JsonElement json)
+        {
+            var test = await _loggingAccessor.LogMessageAsync(null, json.ToString());
+
+            PlaidWebhookResponseDto? webhookResponse = JsonSerializer.Deserialize<PlaidWebhookResponseDto>(json);
             return true;
         }
     }

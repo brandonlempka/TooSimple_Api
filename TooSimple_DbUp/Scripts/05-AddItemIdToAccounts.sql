@@ -1,0 +1,2 @@
+﻿ALTER TABLE PlaidAccounts
+ADD COLUMN ItemId NVARCHAR(255);

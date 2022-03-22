@@ -16,6 +16,8 @@ namespace TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels
         public CreateLinkTokenUserModel User { get; set; }
         [JsonPropertyName("client_name")]
         public string ClientName { get; set; } = string.Empty;
+        [JsonPropertyName("webhook")]
+        public string WebHookCallbackUrl { get; set; } = string.Empty;
 
         public CreateLinkTokenRequestModel(string userId) : base()
         {
@@ -23,6 +25,7 @@ namespace TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels
             CountryCodes = PlaidSettings.Countries;
             Language = PlaidSettings.Language;
             Products = PlaidSettings.Products;
+            WebHookCallbackUrl = "http://167.248.86.30/Plaid/NewTransactions";
             User = new()
             {
                 ClientUserId = userId

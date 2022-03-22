@@ -33,7 +33,7 @@ namespace TooSimple_Api.Controllers
         public async Task<bool> Get()
         {
             
-            var test = await _accountUpdateAccessor.UpdateAccountBalancesAsync("test");
+            var test = await _accountUpdateAccessor.UpdateAccountBalancesByUserIdAsync("test");
             return test;
         }
 
