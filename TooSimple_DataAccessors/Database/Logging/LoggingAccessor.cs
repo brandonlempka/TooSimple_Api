@@ -22,10 +22,13 @@ namespace TooSimple_DataAccessors.Database.Logging
                 using (IDbTransaction transaction = connection.BeginTransaction())
                 {
                     string query = @"INSERT INTO Logging
-                                    (Code, Message) 
+                                    (Code
+                                    , Message
+                                    , MessageTime) 
                                     VALUES
-                                    (@Code,
-                                    @Message)";
+                                    (@Code
+                                    , @Message
+                                    , @Time)";
 
                     try
                     {
@@ -34,14 +37,14 @@ namespace TooSimple_DataAccessors.Database.Logging
                             new
                             {
                                 Code = errorCode,
-                                Message = message
+                                Message = message,
+                                Time = DateTime.UtcNow
                             },
                             transaction);
 
                         transaction.Commit();
                         return true;
                     }
-
                     catch (Exception ex)
                     {
                         transaction.Rollback();

@@ -32,7 +32,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
         /// <returns>Boolean indicating success.</returns>
         public async Task<bool> UpdateAccountBalancesByUserIdAsync(string userId)
         {
-            IEnumerable<PlaidAccountDataModel> plaidAccounts = await _accountAccessor.GetPlaidAccountsAsync(userId);
+            IEnumerable<PlaidAccountDataModel> plaidAccounts = await _accountAccessor.GetPlaidAccountsByUserIdAsync(userId);
             if (plaidAccounts is null || !plaidAccounts.Any())
             {
                 return false;
@@ -49,28 +49,8 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                     .Select(account => account.PlaidAccountId)
                     .ToArray();
 
-                AccountUpdateRequestModel requestModel = new(
-                    accessToken,
-                    accountIds);
-
-                AccountUpdateResponseModel plaidUpdateResponse = await _accountUpdateAccessor
-                    .UpdateAccountBalancesAsync(requestModel);
-
-                if (plaidUpdateResponse is null)
-                {
-                    return false;
-                }
-
-                if (plaidUpdateResponse.ErrorCode == PlaidErrorCodes.ITEM_LOGIN_REQUIRED.ToString())
-                {
-                    bool response = await _accountAccessor.UpdateAccountRelogAsync(true, accountIds);
-                    if (!response)
-                        return false;
-                }
-                else
-                {
-                    bool response = await _accountAccessor.UpdateAccountBalancesAsync(plaidUpdateResponse);
-                }
+                bool response = await PlaidBalanceUpdate(accessToken, accountIds);
+                return response;
             }
 
             return true;
@@ -83,10 +63,78 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
         /// <returns>Boolean indicating success.</returns>
         public async Task<bool> UpdateAccountBalancesByItemIdAsync(JsonElement json)
         {
-            var test = await _loggingAccessor.LogMessageAsync(null, json.ToString());
-
+            bool response = false;
             PlaidWebhookResponseDto? webhookResponse = JsonSerializer.Deserialize<PlaidWebhookResponseDto>(json);
-            return true;
+
+            if (webhookResponse is null)
+            {
+                return response;
+            }
+            string? errorCode = null;
+            
+            // todo
+            // I'm not sure what else I'm likely to get, but probably need to handle this if
+            // a lot of these come through 
+            if (webhookResponse.WebhookType != PlaidWebhookType.TRANSACTIONS.ToString()
+                || webhookResponse.WebhookCode != PlaidWebhookCode.DEFAULT_UPDATE.ToString())
+            {
+                response = await _loggingAccessor.LogMessageAsync(errorCode, json.ToString());
+                return response;
+            }
+
+            if (webhookResponse.WebhookCode == PlaidWebhookCode.DEFAULT_UPDATE.ToString()
+                && !string.IsNullOrWhiteSpace(webhookResponse.ItemId))
+            {
+                PlaidAccountDataModel plaidAccount = await _accountAccessor
+                    .GetPlaidAccountsByItemIdAsync(webhookResponse.ItemId);
+
+                if (plaidAccount is null || plaidAccount.ReLoginRequired)
+                {
+                    return response;
+                }
+
+                string[] accountId =
+                {
+                    plaidAccount.PlaidAccountId
+                };
+
+                response = await PlaidBalanceUpdate(plaidAccount.AccessToken, accountId);
+
+                if (response)
+                {
+                    // todo
+                    // logging json for now for analysis.
+                    response = await _loggingAccessor.LogMessageAsync(null, json.ToString());
+                }
+
+                return response;
+            }
+
+            return response;
+        }
+
+        private async Task<bool> PlaidBalanceUpdate(string accessToken, string[] accountIds)
+        {
+            AccountUpdateRequestModel requestModel = new(
+                accessToken,
+                accountIds);
+
+            AccountUpdateResponseModel plaidUpdateResponse = await _accountUpdateAccessor
+                .UpdateAccountBalancesAsync(requestModel);
+
+            if (plaidUpdateResponse is null)
+            {
+                return false;
+            }
+
+            if (plaidUpdateResponse.ErrorCode == PlaidErrorCodes.ITEM_LOGIN_REQUIRED.ToString())
+            {
+                bool lockResponse = await _accountAccessor.UpdateAccountRelogAsync(true, accountIds);
+                return lockResponse;
+            }
+
+            bool response = await _accountAccessor.UpdateAccountBalancesAsync(plaidUpdateResponse);
+            return response;
         }
     }
 }

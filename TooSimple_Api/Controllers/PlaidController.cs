@@ -40,10 +40,15 @@ namespace TooSimple_Api.Controllers
         /// Plaid sends this when there are new transactions to use.
         /// </summary>
         /// <param name="json"></param>
+        /// <returns>        
+        /// We always return a 200 because Plaid will keep retrying 
+        /// until it gets a success.
+        /// </returns>
         [HttpPost("newTransactions")]
-        public async Task NewTransactions([FromBody] JsonElement json)
+        public async Task<ActionResult> NewTransactions([FromBody] JsonElement json)
         {
-            var response = await _accountUpdateManager.UpdateAccountBalancesByItemIdAsync(json);
+            bool response = await _accountUpdateManager.UpdateAccountBalancesByItemIdAsync(json);
+            return Ok(response);
         }
     }
 }

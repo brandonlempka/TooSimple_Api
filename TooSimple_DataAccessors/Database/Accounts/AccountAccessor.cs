@@ -21,7 +21,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
         /// </summary>
         /// <param name="userId">Too Simple user Id.</param>
         /// <returns><see cref="PlaidAccountDataModel"/>Enumerable of account data.</returns>
-        public async Task<IEnumerable<PlaidAccountDataModel>> GetPlaidAccountsAsync(string userId)
+        public async Task<IEnumerable<PlaidAccountDataModel>> GetPlaidAccountsByUserIdAsync(string userId)
         {
             userId = "1d4c76c2-148b-47b5-9a53-c29f3a233c80";
             IEnumerable<PlaidAccountDataModel> plaidAccounts;
@@ -45,11 +45,48 @@ namespace TooSimple_DataAccessors.Database.Accounts
                     FROM PlaidAccounts
                     WHERE UserAccountId = @UserId";
 
-                plaidAccounts = await connection.QueryAsync<PlaidAccountDataModel>(query, new { UserId = userId });
+                plaidAccounts = await connection.QueryAsync<PlaidAccountDataModel>(
+                    query, new { UserId = userId });
             }
 
             return plaidAccounts;
         }
+
+        /// <summary>
+        /// Return Plaid Accounts associated with item id.
+        /// </summary>
+        /// <param name="userId">Too Simple user Id.</param>
+        /// <returns><see cref="PlaidAccountDataModel"/>Enumerable of account data.</returns>
+        public async Task<PlaidAccountDataModel> GetPlaidAccountsByItemIdAsync(string itemId)
+        {
+            PlaidAccountDataModel plaidAccount;
+            using (MySqlConnection connection = new(_connectionString))
+            {
+                await connection.OpenAsync();
+                string query = @"SELECT 
+                    PlaidAccountId
+                    , PlaidAccountTypeId
+                    , UserAccountId
+                    , Mask
+                    , Name
+                    , NickName
+                    , CurrentBalance
+                    , AvailableBalance
+                    , CurrencyCode
+                    , AccessToken
+                    , LastUpdated
+                    , IsActiveForBudgetingFeatures
+                    , IsPlaidRelogRequired
+                    FROM PlaidAccounts
+                    WHERE ItemId = @ItemId";
+
+                plaidAccount = await connection.QueryFirstOrDefaultAsync<PlaidAccountDataModel>(
+                    query, new { ItemId = itemId });
+            }
+
+            return plaidAccount;
+        }
+
 
         public async Task<bool> UpdateAccountBalancesAsync(AccountUpdateResponseModel responseModel)
         {
