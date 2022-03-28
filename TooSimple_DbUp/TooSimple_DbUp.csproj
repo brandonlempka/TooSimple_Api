@@ -21,6 +21,7 @@
     <EmbeddedResource Include="Scripts\03-AddGoalsTable.sql" />
     <EmbeddedResource Include="Scripts\04-AddMissingColumn.sql" />
     <EmbeddedResource Include="Scripts\05-AddItemIdToAccounts.sql" />
+    <EmbeddedResource Include="Scripts\06-AddLoggingAndFundingHistoryTables.sql" />
   </ItemGroup>
 
   <ItemGroup>

@@ -43,7 +43,7 @@ namespace TooSimple_Api.Controllers
         [HttpPost("newTransactions")]
         public async Task NewTransactions([FromBody] JsonElement json)
         {
-            var response = await _accountUpdateManager.UpdateAccountBalancesByItemIdAsync(json);
+            bool response = await _accountUpdateManager.UpdateAccountBalancesByItemIdAsync(json);
         }
     }
 }

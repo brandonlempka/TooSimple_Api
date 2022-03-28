@@ -1,8 +1,10 @@
 using TooSimple_DataAccessors.Database.Accounts;
+using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_DataAccessors.Database.Logging;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_DataAccessors.Plaid.TokenExchange;
 using TooSimple_Database;
+using TooSimple_Managers.Budgeting;
 using TooSimple_Managers.Plaid.AccountUpdate;
 using TooSimple_Managers.Plaid.TokenExchange;
 
@@ -20,10 +22,12 @@ string dbConnectionString = builder.Configuration.GetConnectionString("TooSimple
 builder.Services.AddTransient<ITokenExchangeAccessor, TokenExchangeAccessor>();
 builder.Services.AddTransient<IAccountUpdateAccessor, AccountUpdateAccessor>();
 builder.Services.AddTransient<IAccountAccessor, AccountAccessor>();
+builder.Services.AddTransient<IGoalAccessor, GoalAccessor>();
 builder.Services.AddTransient<ILoggingAccessor, LoggingAccessor>();
 
 builder.Services.AddTransient<ITokenExchangeManager, TokenExchangeManager>();
 builder.Services.AddTransient<IAccountUpdateManager, AccountUpdateManager>();
+builder.Services.AddTransient<IBudgetingManager, BudgetingManager>();
 
 var app = builder.Build();
 

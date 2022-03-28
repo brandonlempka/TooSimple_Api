@@ -2,6 +2,7 @@
 using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Database.Logging;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
+using TooSimple_Managers.Budgeting;
 using TooSimple_Poco.Enums;
 using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.Plaid.AccountUpdate;
@@ -14,15 +15,18 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
         private readonly IAccountUpdateAccessor _accountUpdateAccessor;
         private readonly IAccountAccessor _accountAccessor;
         private readonly ILoggingAccessor _loggingAccessor;
+        private readonly IBudgetingManager _budgetingManager;
 
         public AccountUpdateManager(
             IAccountUpdateAccessor accountUpdateAccessor,
             IAccountAccessor accountAccessor,
-            ILoggingAccessor loggingAccessor)
+            ILoggingAccessor loggingAccessor,
+            IBudgetingManager budgetingManager)
         {
             _accountUpdateAccessor = accountUpdateAccessor;
             _accountAccessor = accountAccessor;
             _loggingAccessor = loggingAccessor;
+            _budgetingManager = budgetingManager;
         }
 
         /// <summary>
@@ -45,7 +49,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
             {
                 string accessToken = group.Key;
                 string[] accountIds = group
-                    .Where(account => !account.ReLoginRequired)
+                    .Where(account => !account.IsActiveForBudgetingFeatures)
                     .Select(account => account.PlaidAccountId)
                     .ToArray();
 

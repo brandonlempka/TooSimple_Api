@@ -16,4 +16,10 @@
     <ProjectReference Include="..\TooSimple_Poco\TooSimple_Poco.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Database\Goals\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Database\Goals\" />
+  </ItemGroup>
 </Project>
