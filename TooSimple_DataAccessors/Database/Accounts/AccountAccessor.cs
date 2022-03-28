@@ -23,7 +23,9 @@ namespace TooSimple_DataAccessors.Database.Accounts
         /// <returns><see cref="PlaidAccountDataModel"/>Enumerable of account data.</returns>
         public async Task<IEnumerable<PlaidAccountDataModel>> GetPlaidAccountsByUserIdAsync(string userId)
         {
-            userId = "1d4c76c2-148b-47b5-9a53-c29f3a233c80";
+            if (string.IsNullOrWhiteSpace(userId))
+                userId = "1d4c76c2-148b-47b5-9a53-c29f3a233c80";
+
             IEnumerable<PlaidAccountDataModel> plaidAccounts;
             using (MySqlConnection connection = new(_connectionString))
             {
@@ -101,34 +103,33 @@ namespace TooSimple_DataAccessors.Database.Accounts
                         , LastUpdated = @Now
                         WHERE PlaidAccountId = @Id";
 
-                    try
+                try
+                {
+                    foreach (AccountResponseModel? account in responseModel.Accounts)
                     {
-                        foreach (AccountResponseModel? account in responseModel.Accounts)
-                        {
 
-                            await connection.ExecuteAsync(
-                                query,
-                                new
-                                {
-                                    CurrentBalance = account.Balances.Current,
-                                    AvailableBalance = account.Balances.Available,
-                                    Now = DateTime.UtcNow,
-                                    Id = account.AccountId
-                                },
-                                transaction);
-                        }
+                        await connection.ExecuteAsync(
+                            query,
+                            new
+                            {
+                                CurrentBalance = account.Balances.Current,
+                                AvailableBalance = account.Balances.Available,
+                                Now = DateTime.UtcNow,
+                                Id = account.AccountId
+                            },
+                            transaction);
+                    }
 
-                        transaction.Commit();
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        return false;
-                    }
+                    transaction.Commit();
                 }
-
-                return true;
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return false;
+                }
             }
+
+            return true;
         }
 
         /// <summary>

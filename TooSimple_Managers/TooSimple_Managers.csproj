@@ -11,4 +11,10 @@
     <ProjectReference Include="..\TooSimple_Poco\TooSimple_Poco.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Budgeting\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Budgeting\" />
+  </ItemGroup>
 </Project>
