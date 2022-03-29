@@ -25,7 +25,7 @@ namespace TooSimple_Managers.Budgeting
 
 		public async Task<decimal> GetUserReadyToSpendAsync(string userId)
         {
-			IEnumerable<PlaidAccountDataModel> accounts = await _accountAccessor.GetPlaidAccountsAsync(userId);
+			IEnumerable<PlaidAccountDataModel> accounts = await _accountAccessor.GetPlaidAccountsByUserIdAsync(userId);
 			IEnumerable<GoalDataModel> goals = await _goalAccessor.GetGoalsByUserIdAsync(userId);
 
             decimal accountTotal = accounts

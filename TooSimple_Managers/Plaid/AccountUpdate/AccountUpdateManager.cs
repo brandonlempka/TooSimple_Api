@@ -74,6 +74,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
             {
                 return response;
             }
+
             string? errorCode = null;
             
             // todo
@@ -92,7 +93,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                 PlaidAccountDataModel plaidAccount = await _accountAccessor
                     .GetPlaidAccountsByItemIdAsync(webhookResponse.ItemId);
 
-                if (plaidAccount is null || plaidAccount.ReLoginRequired)
+                if (plaidAccount is null || plaidAccount.IsPlaidRelogRequired)
                 {
                     return response;
                 }
@@ -106,9 +107,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
 
                 if (response)
                 {
-                    // todo
-                    // logging json for now for analysis.
-                    response = await _loggingAccessor.LogMessageAsync(null, json.ToString());
+                    await _budgetingManager.UpdateBudgetByUserId(plaidAccount.UserAccountId);
                 }
 
                 return response;

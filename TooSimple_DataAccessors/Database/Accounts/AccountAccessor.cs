@@ -132,6 +132,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
             return true;
         }
 
+
         /// <summary>
         /// Locks or unlocks Plaid Account if credentials have expired.
         /// </summary>
@@ -147,37 +148,35 @@ namespace TooSimple_DataAccessors.Database.Accounts
         /// </returns>
         public async Task<bool> UpdateAccountRelogAsync(bool isLocked, string[] accountIds)
         {
-            using (var connection = new MySqlConnection(_connectionString))
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
+            using (IDbTransaction transaction = connection.BeginTransaction())
             {
-                await connection.OpenAsync();
-                using (IDbTransaction transaction = connection.BeginTransaction())
-                {
-                    string query = @"UPDATE PlaidAccounts 
+                string query = @"UPDATE PlaidAccounts 
                                     SET IsPlaidRelogRequired = @IsLocked
                                     WHERE PlaidAccountId = @Id";
 
-                    try
-                    {
-                        await connection.ExecuteAsync(
-                            query,
-                            new
-                            {
-                                IsLocked = isLocked,
-                                Id = accountIds
-                            },
-                            transaction);
+                try
+                {
+                    await connection.ExecuteAsync(
+                        query,
+                        new
+                        {
+                            IsLocked = isLocked,
+                            Id = accountIds
+                        },
+                        transaction);
 
-                        transaction.Commit();
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        return false;
-                    }
+                    transaction.Commit();
                 }
-
-                return true;
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return false;
+                }
             }
+
+            return true;
         }
     }
 }
