@@ -21,7 +21,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
         /// </summary>
         /// <param name="userId">Too Simple user Id.</param>
         /// <returns><see cref="PlaidAccountDataModel"/>Enumerable of account data.</returns>
-        public async Task<IEnumerable<PlaidAccountDataModel>> GetPlaidAccountsAsync(string userId)
+        public async Task<IEnumerable<PlaidAccountDataModel>> GetPlaidAccountsByUserIdAsync(string userId)
         {
             if (string.IsNullOrWhiteSpace(userId))
                 userId = "1d4c76c2-148b-47b5-9a53-c29f3a233c80";
@@ -47,16 +47,26 @@ namespace TooSimple_DataAccessors.Database.Accounts
                     FROM PlaidAccounts
                     WHERE UserAccountId = @UserId";
 
-                plaidAccounts = await connection.QueryAsync<PlaidAccountDataModel>(query, new { UserId = userId });
+                plaidAccounts = await connection.QueryAsync<PlaidAccountDataModel>(
+                    query, new { UserId = userId });
             }
 
             return plaidAccounts;
         }
 
-        public async Task<PlaidAccountDataModel> GetPlaidAccountByAccountIdAsync(string accountId)
+        /// <summary>
+        /// Return Plaid Accounts associated with item id.
+        /// </summary>
+        /// <param name="userId">Too Simple user Id.</param>
+        /// <returns><see cref="PlaidAccountDataModel"/>Enumerable of account data.</returns>
+        public async Task<PlaidAccountDataModel> GetPlaidAccountsByItemIdAsync(string itemId)
         {
-            using MySqlConnection connection = new(_connectionString);
-            string query = @"SELECT 
+            PlaidAccountDataModel plaidAccount;
+            using (MySqlConnection connection = new(_connectionString))
+            {
+                await connection.OpenAsync();
+                string query = @"SELECT 
+
                     PlaidAccountId
                     , PlaidAccountTypeId
                     , UserAccountId
@@ -71,17 +81,13 @@ namespace TooSimple_DataAccessors.Database.Accounts
                     , IsActiveForBudgetingFeatures
                     , IsPlaidRelogRequired
                     FROM PlaidAccounts
-                    WHERE PlaidAccountId = @PlaidAccountId";
+                    WHERE ItemId = @ItemId";
 
-            PlaidAccountDataModel plaidAccountDataModel = await connection
-                .QueryFirstOrDefaultAsync<PlaidAccountDataModel>(
-                    query,
-                    new
-                    {
-                        PlaidAccountId = accountId
-                    });
+                plaidAccount = await connection.QueryFirstOrDefaultAsync<PlaidAccountDataModel>(
+                    query, new { ItemId = itemId });
+            }
 
-            return plaidAccountDataModel;
+            return plaidAccount;
         }
 
         public async Task<bool> UpdateAccountBalancesAsync(AccountUpdateResponseModel responseModel)
@@ -126,6 +132,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
             return true;
         }
 
+
         /// <summary>
         /// Locks or unlocks Plaid Account if credentials have expired.
         /// </summary>
@@ -141,37 +148,35 @@ namespace TooSimple_DataAccessors.Database.Accounts
         /// </returns>
         public async Task<bool> UpdateAccountRelogAsync(bool isLocked, string[] accountIds)
         {
-            using (var connection = new MySqlConnection(_connectionString))
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
+            using (IDbTransaction transaction = connection.BeginTransaction())
             {
-                await connection.OpenAsync();
-                using (IDbTransaction transaction = connection.BeginTransaction())
-                {
-                    string query = @"UPDATE PlaidAccounts 
+                string query = @"UPDATE PlaidAccounts 
                                     SET IsPlaidRelogRequired = @IsLocked
                                     WHERE PlaidAccountId = @Id";
 
-                    try
-                    {
-                        await connection.ExecuteAsync(
-                            query,
-                            new
-                            {
-                                IsLocked = isLocked,
-                                Id = accountIds
-                            },
-                            transaction);
+                try
+                {
+                    await connection.ExecuteAsync(
+                        query,
+                        new
+                        {
+                            IsLocked = isLocked,
+                            Id = accountIds
+                        },
+                        transaction);
 
-                        transaction.Commit();
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        return false;
-                    }
+                    transaction.Commit();
                 }
-
-                return true;
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return false;
+                }
             }
+
+            return true;
         }
     }
 }
