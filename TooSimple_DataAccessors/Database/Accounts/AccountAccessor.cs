@@ -66,6 +66,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
             {
                 await connection.OpenAsync();
                 string query = @"SELECT 
+
                     PlaidAccountId
                     , PlaidAccountTypeId
                     , UserAccountId
@@ -89,15 +90,14 @@ namespace TooSimple_DataAccessors.Database.Accounts
             return plaidAccount;
         }
 
-
         public async Task<bool> UpdateAccountBalancesAsync(AccountUpdateResponseModel responseModel)
         {
-            using (var connection = new MySqlConnection(_connectionString))
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using (IDbTransaction transaction = connection.BeginTransaction())
             {
-                await connection.OpenAsync();
-                using (IDbTransaction transaction = connection.BeginTransaction())
-                {
-                    string query = @"UPDATE PlaidAccounts
+                string query = @"UPDATE PlaidAccounts
                         SET CurrentBalance = @CurrentBalance
                         , AvailableBalance = @AvailableBalance
                         , LastUpdated = @Now

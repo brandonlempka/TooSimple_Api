@@ -48,6 +48,7 @@ namespace TooSimple_Api.Controllers
         public async Task<ActionResult> NewTransactions([FromBody] JsonElement json)
         {
             bool response = await _accountUpdateManager.UpdateAccountBalancesByItemIdAsync(json);
+
             return Ok(response);
         }
     }
