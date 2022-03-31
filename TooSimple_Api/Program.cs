@@ -5,13 +5,13 @@ using TooSimple_DataAccessors.Database.Logging;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_DataAccessors.Plaid.TokenExchange;
 using TooSimple_Managers.Budgeting;
+using TooSimple_Managers.Goals;
 using TooSimple_Managers.Plaid.AccountUpdate;
 using TooSimple_Managers.Plaid.TokenExchange;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers(options => options
     .Filters
     .Add(typeof(ResponseMap)));
@@ -31,6 +31,7 @@ builder.Services.AddTransient<ILoggingAccessor, LoggingAccessor>();
 builder.Services.AddTransient<ITokenExchangeManager, TokenExchangeManager>();
 builder.Services.AddTransient<IAccountUpdateManager, AccountUpdateManager>();
 builder.Services.AddTransient<IBudgetingManager, BudgetingManager>();
+builder.Services.AddTransient<IGoalManager, GoalManager>();
 
 var app = builder.Build();
 

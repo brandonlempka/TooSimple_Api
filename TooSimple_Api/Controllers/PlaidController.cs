@@ -29,7 +29,7 @@ namespace TooSimple_Api.Controllers
         /// </summary>
         /// <param name="userId">User's Too Simple ID.</param>
         /// <returns>Dto with link token.</returns>
-        [HttpGet("createLinkToken")]
+        [HttpGet("createLinkToken/{userId}")]
         public async Task<CreateLinkTokenDto> CreateLinkToken(string userId)
         {
             CreateLinkTokenDto tokenDto = await _tokenExchangeManager.GetCreateLinkTokenAsync(userId);

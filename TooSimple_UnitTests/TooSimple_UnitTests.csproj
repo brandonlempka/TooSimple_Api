@@ -21,10 +21,6 @@
     <None Remove="Moq" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Budgeting\" />
-    <Folder Include="Budgeting\Goals\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\TooSimple_DataAccessors\TooSimple_DataAccessors.csproj" />
     <ProjectReference Include="..\TooSimple_Managers\TooSimple_Managers.csproj" />
   </ItemGroup>

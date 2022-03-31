@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Database.Goals;
-using TooSimple_Managers.Budgeting;
+using TooSimple_Managers.Goals;
 using TooSimple_Poco.Models.Budgeting;
 using TooSimple_Poco.Models.Database;
 
@@ -41,11 +41,10 @@ namespace TooSimple_UnitTests.Budgeting.Goals
 				.ReturnsAsync(goals);
 
 
-			BudgetingManager budgetingManager = new(
-				goalAccessorMock.Object,
-				accountAccessorMock.Object);
+			GoalManager goalManager = new(
+				goalAccessorMock.Object);
 
-            GetGoalsDto response = await budgetingManager.GetGoalsByUserIdAsync("123");
+			GetGoalsDto response = await goalManager.GetGoalsByUserIdAsync("123");
 			Assert.IsNotNull(response.Goals);
 			Assert.AreEqual(2, response.Goals.Count());
 			Assert.IsTrue(response.Success);
@@ -67,17 +66,16 @@ namespace TooSimple_UnitTests.Budgeting.Goals
 				.ReturnsAsync(goals);
 
 
-			BudgetingManager budgetingManager = new(
-				goalAccessorMock.Object,
-				accountAccessorMock.Object);
+			GoalManager goalManager = new(
+				goalAccessorMock.Object);
 
-			GetGoalsDto response = await budgetingManager
+			GetGoalsDto response = await goalManager
 				.GetGoalsByUserIdAsync("123");
 
 			Assert.IsNull(response.Goals);
 			Assert.IsFalse(response.Success);
 			Assert.IsFalse(string.IsNullOrWhiteSpace(response.ErrorMessage));
-			Assert.AreEqual(HttpStatusCode.NoContent, response.Status);
+			Assert.AreEqual(HttpStatusCode.NotFound, response.Status);
 		}
 	}
 }

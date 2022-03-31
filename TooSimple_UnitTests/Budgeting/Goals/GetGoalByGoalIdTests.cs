@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Database.Goals;
-using TooSimple_Managers.Budgeting;
+using TooSimple_Managers.Goals;
 using TooSimple_Poco.Models.Budgeting;
 using TooSimple_Poco.Models.Database;
 
@@ -46,7 +46,6 @@ namespace TooSimple_UnitTests.Budgeting.Goals
             };
 
             Mock<IGoalAccessor> goalAccessorMock = new();
-            Mock<IAccountAccessor> accountAccessorMock = new();
 
             goalAccessorMock.Setup(
                 x => x.GetGoalByGoalIdAsync(
@@ -58,11 +57,10 @@ namespace TooSimple_UnitTests.Budgeting.Goals
                      It.IsAny<string>()))
                  .ReturnsAsync(fundingHistory);
 
-            BudgetingManager budgetingManager = new(
-                goalAccessorMock.Object,
-                accountAccessorMock.Object);
+            GoalManager goalManager = new(
+                goalAccessorMock.Object);
 
-            GetGoalDto response = await budgetingManager
+            GetGoalDto response = await goalManager
                 .GetGoalByGoalIdAsync("123");
 
             Assert.IsNotNull(response);
@@ -102,11 +100,10 @@ namespace TooSimple_UnitTests.Budgeting.Goals
                      It.IsAny<string>()))
                  .ReturnsAsync(fundingHistory);
 
-            BudgetingManager budgetingManager = new(
-                goalAccessorMock.Object,
-                accountAccessorMock.Object);
+            GoalManager goalManager = new(
+                goalAccessorMock.Object);
 
-            GetGoalDto response = await budgetingManager
+            GetGoalDto response = await goalManager
                 .GetGoalByGoalIdAsync("123");
 
             Assert.IsNotNull(response);
@@ -122,7 +119,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
         [TestMethod]
         public async Task GetGoalNoContentTest()
         {
-            GoalDataModel goal = new();
+            GoalDataModel? goal = null;
 
             Mock<IGoalAccessor> goalAccessorMock = new();
             Mock<IAccountAccessor> accountAccessorMock = new();
@@ -132,11 +129,10 @@ namespace TooSimple_UnitTests.Budgeting.Goals
                     It.IsAny<string>()))
                 .ReturnsAsync(goal);
 
-            BudgetingManager budgetingManager = new(
-                goalAccessorMock.Object,
-                accountAccessorMock.Object);
+            GoalManager goalManager = new(
+                goalAccessorMock.Object);
 
-            GetGoalDto response = await budgetingManager
+            GetGoalDto response = await goalManager
                 .GetGoalByGoalIdAsync("123");
 
             Assert.IsNotNull(response);
@@ -144,7 +140,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
             Assert.IsNull(response.FundingHistory);
             Assert.IsFalse(response.Success);
             Assert.IsFalse(string.IsNullOrWhiteSpace(response.ErrorMessage));
-            Assert.AreEqual(HttpStatusCode.NoContent, response.Status);
+            Assert.AreEqual(HttpStatusCode.NotFound, response.Status);
         }
     }
 }

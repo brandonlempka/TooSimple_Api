@@ -2,7 +2,6 @@
 using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_Poco.Enums;
-using TooSimple_Poco.Models.Budgeting;
 using TooSimple_Poco.Models.Database;
 
 namespace TooSimple_Managers.Budgeting
@@ -18,94 +17,6 @@ namespace TooSimple_Managers.Budgeting
             _goalAccessor = goalAccessor;
             _accountAccessor = accountAccessor;
         }
-
-        /// <summary>
-        /// Retrieves goals from database.
-        /// </summary>
-        /// <param name="userId">
-        /// User ID to retrieve goals for
-        /// </param>
-        /// <returns>
-        /// GetGoalsDto with goals objects & http status code.
-        /// </returns>
-		public async Task<GetGoalsDto> GetGoalsByUserIdAsync(string userId)
-        {
-            IEnumerable<GoalDataModel> goals = await _goalAccessor.GetGoalsByUserIdAsync(userId);
-            if (!goals.Any())
-            {
-                GetGoalsDto errorModel = new()
-                {
-                    ErrorMessage = "No goals found.",
-                    Status = HttpStatusCode.NoContent,
-                };
-
-                return errorModel;
-            }
-
-            GetGoalsDto responseModel = new()
-            {
-                Success = true,
-                Status = HttpStatusCode.OK,
-                Goals = goals
-            };
-
-            return responseModel;
-        }
-
-        /// <summary>
-        /// Gets goal and its history from database.
-        /// </summary>
-        /// <param name="goalId">
-        /// Goal ID to get data for.
-        /// </param>
-        /// <returns>
-        /// DTO with http response message.
-        /// </returns>
-        public async Task<GetGoalDto> GetGoalByGoalIdAsync(string goalId)
-        {
-            GoalDataModel goal = await _goalAccessor.GetGoalByGoalIdAsync(goalId);
-            if (string.IsNullOrWhiteSpace(goal.GoalId))
-            {
-                GetGoalDto errorModel = new()
-                {
-                    ErrorMessage = "No goal found.",
-                    Status = HttpStatusCode.NoContent
-                };
-
-                return errorModel;
-            }
-
-            IEnumerable<FundingHistoryDataModel> fundingHistory = await _goalAccessor
-                .GetFundingHistoryByGoalId(goalId);
-
-            if (fundingHistory.Any())
-            {
-                fundingHistory
-                    .Where(fundingHistory => string.IsNullOrWhiteSpace(
-                        fundingHistory.DestinationGoalName))
-                    .ToList()
-                    .ForEach(fundingHistory =>
-                        fundingHistory.DestinationGoalName = "Ready to Spend");
-
-                fundingHistory
-                     .Where(fundingHistory => string.IsNullOrWhiteSpace(
-                         fundingHistory.SourceGoalName))
-                     .ToList()
-                     .ForEach(fundingHistory =>
-                         fundingHistory.SourceGoalName = "Ready to Spend");
-            }
-
-            GetGoalDto responseModel = new()
-            {
-                Success = true,
-                Status = HttpStatusCode.OK,
-                Goal = goal,
-                FundingHistory = fundingHistory
-            };
-
-            return responseModel;
-        }
-
 
         public async Task<decimal> GetUserReadyToSpendAsync(string userId)
         {
@@ -206,8 +117,8 @@ namespace TooSimple_Managers.Budgeting
                                 currentGoal.NextContributionAmount = nextContributionAmount;
                                 currentGoal.NextContributionDate = nextContributionDate;
 
-                                response = await _goalAccessor.UpdateGoalAsync(currentGoal);
-                                if (!response)
+                                var responseModel = await _goalAccessor.UpdateGoalAsync(currentGoal);
+                                if (!responseModel.Success)
                                     break;
                             }
                         }
