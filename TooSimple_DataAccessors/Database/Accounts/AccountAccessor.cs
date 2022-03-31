@@ -39,6 +39,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
                     , NickName
                     , CurrentBalance
                     , AvailableBalance
+                    , CreditLimit
                     , CurrencyCode
                     , AccessToken
                     , LastUpdated
@@ -75,6 +76,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
                     , NickName
                     , CurrentBalance
                     , AvailableBalance
+                    , CreditLimit
                     , CurrencyCode
                     , AccessToken
                     , LastUpdated
@@ -90,6 +92,15 @@ namespace TooSimple_DataAccessors.Database.Accounts
             return plaidAccount;
         }
 
+        /// <summary>
+        /// Updates TooSimple database with latest plaid account balances.
+        /// </summary>
+        /// <param name="responseModel">
+        /// The return from plaid.
+        /// </param>
+        /// <returns>
+        /// A bool indicating success.
+        /// </returns>
         public async Task<bool> UpdateAccountBalancesAsync(AccountUpdateResponseModel responseModel)
         {
             using var connection = new MySqlConnection(_connectionString);
@@ -107,7 +118,6 @@ namespace TooSimple_DataAccessors.Database.Accounts
                 {
                     foreach (AccountResponseModel? account in responseModel.Accounts)
                     {
-
                         await connection.ExecuteAsync(
                             query,
                             new

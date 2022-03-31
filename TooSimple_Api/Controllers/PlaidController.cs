@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using TooSimple_DataAccessors.Database.Logging;
 using TooSimple_Managers.Plaid.AccountUpdate;
 using TooSimple_Managers.Plaid.TokenExchange;
 using TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels;
+using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Api.Controllers
 {
@@ -16,7 +16,6 @@ namespace TooSimple_Api.Controllers
     {
         private readonly ITokenExchangeManager _tokenExchangeManager;
         private readonly IAccountUpdateManager _accountUpdateManager;
-        private readonly ILoggingAccessor _loggingAccessor;
 
         public PlaidController(ITokenExchangeManager tokenExchangeManager,
             IAccountUpdateManager accountUpdateManager)
@@ -33,19 +32,22 @@ namespace TooSimple_Api.Controllers
         [HttpGet("createLinkToken")]
         public async Task<CreateLinkTokenDto> CreateLinkToken(string userId)
         {
-            return await _tokenExchangeManager.GetCreateLinkTokenAsync(userId);
+            CreateLinkTokenDto tokenDto = await _tokenExchangeManager.GetCreateLinkTokenAsync(userId);
+            return tokenDto;
         }
 
         /// <summary>
         /// Plaid sends this when there are new transactions to use.
         /// </summary>
-        /// <param name="json"></param>
+        /// <param name="json">
+        /// Data from plaid.
+        /// </param>
         /// <returns>        
         /// We always return a 200 because Plaid will keep retrying 
         /// until it gets a success.
         /// </returns>
-        [HttpPost("newTransactions")]
-        public async Task<ActionResult> NewTransactions([FromBody] JsonElement json)
+        [HttpPost("webhookHandler")]
+        public async Task<ActionResult> WebhookHandler([FromBody] JsonElement json)
         {
             bool response = await _accountUpdateManager.UpdateAccountBalancesByItemIdAsync(json);
 

@@ -15,9 +15,18 @@ namespace TooSimple_DataAccessors.Database.Goals
             _connectionString = configuration.GetConnectionString("TooSimpleMySql");
         }
 
+        /// <summary>
+        /// Retrieves goals from database by user id.
+        /// </summary>
+        /// <param name="userId">
+        /// User ID to run against.
+        /// </param>
+        /// <returns>
+        /// IEnumerable of Goals.
+        /// </returns>
         public async Task<IEnumerable<GoalDataModel>> GetGoalsByUserIdAsync(string userId)
         {
-            IEnumerable<GoalDataModel> goals;
+            IEnumerable<GoalDataModel> goals = Enumerable.Empty<GoalDataModel>();
             using (MySqlConnection connection = new(_connectionString))
             {
                 await connection.OpenAsync();
@@ -41,17 +50,27 @@ namespace TooSimple_DataAccessors.Database.Goals
                     , IsContributionFixed
                     , IsArchived
                     FROM Goals
-                    WHERE UserAccountId = @UserId";
+                    WHERE UserAccountId = @userId";
 
-                goals = await connection.QueryAsync<GoalDataModel>(query, new { UserId = userId });
+                goals = await connection.QueryAsync<GoalDataModel>(query
+                    , new { userId });
             }
 
             return goals;
         }
 
+        /// <summary>
+        /// Gets goal by its goal ID. Returns 1 Goal.
+        /// </summary>
+        /// <param name="goalId">
+        /// Goal ID to return.
+        /// </param>
+        /// <returns>
+        /// Returns 1 Goal.
+        /// </returns>
         public async Task<GoalDataModel> GetGoalByGoalIdAsync(string goalId)
         {
-            GoalDataModel goal;
+            GoalDataModel goal = new();
             using (MySqlConnection connection = new(_connectionString))
             {
                 await connection.OpenAsync();
@@ -138,20 +157,33 @@ namespace TooSimple_DataAccessors.Database.Goals
             }
         }
 
-
+        /// <summary>
+        /// Retrieves the funding history for a goal by its goal ID.
+        /// </summary>
+        /// <param name="goalId">
+        /// Goal ID to return history for.
+        /// </param>
+        /// <returns>
+        /// IEnumerable of the history data model.
+        /// </returns>
         public async Task<IEnumerable<FundingHistoryDataModel>> GetFundingHistoryByGoalId(string goalId)
         {
-            IEnumerable<FundingHistoryDataModel> histories;
+            IEnumerable<FundingHistoryDataModel> histories = Enumerable
+                .Empty<FundingHistoryDataModel>(); ;
             using (MySqlConnection connection = new(_connectionString))
             {
-                string query = @"SELECT FundingHistoryId
-                    , SourceGoalId
-                    , DestinationGoalId
-                    , Amount
-                    , TransferDate
-                    , Note
-                    , IsAutomatedTransfer
-                    FROM FundingHistory
+                string query = @"SELECT f.FundingHistoryId
+                    , f.SourceGoalId
+                    , (SELECT GoalName FROM Goals WHERE GoalId = f.SourceGoalId)
+                        AS SourceGoalName
+                    , f.DestinationGoalId
+                    , (SELECT GoalName FROM Goals WHERE GoalId = f.DestinationGoalId)
+                        AS DestinationGoalName
+                    , f.Amount
+                    , f.TransferDate
+                    , f.Note
+                    , f.IsAutomatedTransfer
+                    FROM FundingHistory f
                     WHERE SourceGoalId = @GoalId
                     OR DestinationGoalId = @GoalId;";
 
@@ -270,7 +302,7 @@ namespace TooSimple_DataAccessors.Database.Goals
                     Amount = dataModel.Amount,
                     TransferDate = dataModel.TransferDate,
                     Note = dataModel.Note,
-                    IsAutomatedTransfer = dataModel.AutomatedTransfer
+                    IsAutomatedTransfer = dataModel.IsAutomatedTransfer
                 },
                 transaction);
 

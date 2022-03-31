@@ -17,9 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TooSimple_DataAccessors\TooSimple_DataAccessors.csproj" />
-    <ProjectReference Include="..\TooSimple_Database\TooSimple_Database.csproj" />
     <ProjectReference Include="..\TooSimple_Managers\TooSimple_Managers.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Filters\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Filters\" />
+  </ItemGroup>
 </Project>

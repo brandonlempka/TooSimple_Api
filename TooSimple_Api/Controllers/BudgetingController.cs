@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TooSimple_Managers.Budgeting;
+using TooSimple_Poco.Models.Budgeting;
 using TooSimple_Poco.Models.Database;
 
 namespace TooSimple_Api.Controllers
@@ -15,11 +16,36 @@ namespace TooSimple_Api.Controllers
 			_budgetingManager = budgetingManager;
 		}
 
-		[HttpGet("getGoals")]
-		public async Task<ActionResult<GoalDataModel>> GetGoals(string userId)
+		/// <summary>
+        /// Retrieves all goals for user.
+        /// </summary>
+        /// <param name="userId">
+        /// ID of user to return goals for.
+        /// </param>
+        /// <returns>
+        /// DTO containing IEnumerable of goals.
+        /// </returns>
+		[HttpGet("goals/userId/{userId}")]
+		public async Task<GetGoalsDto> GetGoalsByUserId(string userId)
         {
-            IEnumerable<GoalDataModel>? goals = await _budgetingManager.GetGoalsByUserIdAsync(userId);
-			return Ok(goals);
+            GetGoalsDto goalsDto = await _budgetingManager.GetGoalsByUserIdAsync(userId);
+			return goalsDto;
+        }
+
+        /// <summary>
+        /// Retrieves single goal and history by goal ID.
+        /// </summary>
+        /// <param name="goalId">
+        /// Goal ID to return.
+        /// </param>
+        /// <returns>
+        /// DTO containing goal and IEnumerable of goal contribution history.
+        /// </returns>
+        [HttpGet("goal/goalId/{goalId}")]
+        public async Task<GetGoalDto> GetGoalByGoalId(string goalId)
+        {
+            GetGoalDto goalDto = await _budgetingManager.GetGoalByGoalIdAsync(goalId);
+            return goalDto;
         }
 
 		[HttpGet("getReadyToSpend")]

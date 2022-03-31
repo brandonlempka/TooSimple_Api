@@ -2,7 +2,7 @@
 
 namespace TooSimple_DataAccessors.Plaid.AccountUpdate
 {
-    public interface IAccountUpdateAccessor
+    public interface IPlaidAccountUpdateAccessor
     {
         Task<AccountUpdateResponseModel> UpdateAccountBalancesAsync(
             AccountUpdateRequestModel requestModel);

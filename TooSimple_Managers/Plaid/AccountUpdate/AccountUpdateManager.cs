@@ -12,13 +12,13 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
 {
     public class AccountUpdateManager : IAccountUpdateManager
     {
-        private readonly IAccountUpdateAccessor _accountUpdateAccessor;
+        private readonly IPlaidAccountUpdateAccessor _accountUpdateAccessor;
         private readonly IAccountAccessor _accountAccessor;
         private readonly ILoggingAccessor _loggingAccessor;
         private readonly IBudgetingManager _budgetingManager;
 
         public AccountUpdateManager(
-            IAccountUpdateAccessor accountUpdateAccessor,
+            IPlaidAccountUpdateAccessor accountUpdateAccessor,
             IAccountAccessor accountAccessor,
             ILoggingAccessor loggingAccessor,
             IBudgetingManager budgetingManager)

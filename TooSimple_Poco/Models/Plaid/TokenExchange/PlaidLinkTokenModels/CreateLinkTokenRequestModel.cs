@@ -8,14 +8,19 @@ namespace TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels
     {
         [JsonPropertyName("country_codes")]
         public string[] CountryCodes { get; set; } = Array.Empty<string>();
+
         [JsonPropertyName("language")]
         public string Language { get; set; } = string.Empty;
+
         [JsonPropertyName("products")]
         public string[] Products { get; set; } = Array.Empty<string>();
+
         [JsonPropertyName("user")]
         public CreateLinkTokenUserModel User { get; set; }
+
         [JsonPropertyName("client_name")]
         public string ClientName { get; set; } = string.Empty;
+
         [JsonPropertyName("webhook")]
         public string WebHookCallbackUrl { get; set; } = string.Empty;
 
@@ -25,7 +30,7 @@ namespace TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels
             CountryCodes = PlaidSettings.Countries;
             Language = PlaidSettings.Language;
             Products = PlaidSettings.Products;
-            WebHookCallbackUrl = "http://167.248.86.30/Plaid/NewTransactions";
+            WebHookCallbackUrl = "http://brandonlempka.com/api/Plaid/webhookHandler";
             User = new()
             {
                 ClientUserId = userId

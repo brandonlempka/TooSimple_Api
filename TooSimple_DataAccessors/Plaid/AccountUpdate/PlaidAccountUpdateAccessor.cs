@@ -5,7 +5,7 @@ using TooSimple_Poco.Settings;
 
 namespace TooSimple_DataAccessors.Plaid.AccountUpdate
 {
-    public class AccountUpdateAccessor : IAccountUpdateAccessor
+    public class PlaidAccountUpdateAccessor : IPlaidAccountUpdateAccessor
     {
         private static readonly HttpClient _httpClient = new();
 
@@ -15,10 +15,6 @@ namespace TooSimple_DataAccessors.Plaid.AccountUpdate
         /// <param name="requestModel">
         /// <see cref="AccountUpdateRequestModel"/> containing access token
         /// & account IDs to update.
-        /// </param>
-        /// <param name="accountIds">
-        /// One plaid access token can be used with multiple account IDs if
-        /// they are added at the same time.
         /// </param>
         /// <returns></returns>
         public async Task<AccountUpdateResponseModel> UpdateAccountBalancesAsync(
