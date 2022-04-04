@@ -2,6 +2,9 @@
 {
     public enum PlaidWebhookCode
     {
-        DEFAULT_UPDATE
+        DEFAULT_UPDATE,
+        HISTORICAL_UPDATE,
+        INITIAL_UPDATE,
+        TRANSACTIONS_REMOVED
     }
 }

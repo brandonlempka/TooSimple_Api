@@ -7,6 +7,9 @@ namespace TooSimple_Poco.Models.Plaid.AccountUpdate
         [JsonPropertyName("account_id")]
         public string? AccountId { get; set; }
 
+        [JsonPropertyName("account_owner")]
+        public string? AccountOwner { get; set; }
+
         [JsonPropertyName("balances")]
         public BalanceResponseModel? Balances { get; set; }
 

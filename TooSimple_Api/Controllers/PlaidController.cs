@@ -49,9 +49,9 @@ namespace TooSimple_Api.Controllers
         [HttpPost("webhookHandler")]
         public async Task<ActionResult> WebhookHandler([FromBody] JsonElement json)
         {
-            bool response = await _accountUpdateManager.UpdateAccountBalancesByItemIdAsync(json);
+            _ = await _accountUpdateManager.UpdateAccountBalancesByItemIdAsync(json);
 
-            return Ok(response);
+            return Ok();
         }
     }
 }

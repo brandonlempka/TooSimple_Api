@@ -1,0 +1,41 @@
+﻿create table PlaidTransactions
+(
+	PlaidTransactionId CHAR(40) PRIMARY KEY
+	, AccountOwner nvarchar(255)
+	, Amount decimal(18,2)
+	, AuthorizedDate datetime
+	, TransactionDate datetime
+	, CategoryId nvarchar(255)
+	, PrimaryCategory nvarchar(255)
+	, DetailedCategory nvarchar(255)
+	, CurrencyCode nvarchar(255)
+	, Address nvarchar(255)
+	, City nvarchar(255)
+	, Country nvarchar(255)
+	, Latitude  nvarchar(255)
+	, Longitude nvarchar(255)
+	, PostalCode nvarchar(255)
+	, Region nvarchar(255)
+	, StoreNumber nvarchar(255)
+	, MerchantName nvarchar(255)
+	, Name nvarchar(255)
+	, PaymentChannel nvarchar(255)
+	, ByOrderOf nvarchar(255)
+	, Payee nvarchar(255)
+	, Payer nvarchar(255)
+	, PaymentMethod nvarchar(255)
+	, PaymentProcessor nvarchar(255)
+	, PpdId nvarchar(255)
+	, Reason nvarchar(255)
+	, ReferenceNumber nvarchar(255)
+	, IsPending boolean
+	, PendingTransactionId nvarchar(255)
+	, TransactionCode nvarchar(255)
+	, TransactionType nvarchar(255)
+	, UnofficialCurrencyCode nvarchar(255)
+	, SpendingFromGoalId nvarchar(255)
+	, PlaidAccountId char(40)
+	, UserAccountId char(40)
+	,foreign key (UserAccountId) references UserAccounts(UserAccountId)	
+	,foreign key (PlaidAccountId) references PlaidAccounts(PlaidAccountId)
+);

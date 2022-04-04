@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using TooSimple_Poco.Enums;
 
 namespace TooSimple_Poco.Models.Plaid.Webhooks
 {

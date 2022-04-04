@@ -5,9 +5,6 @@ namespace TooSimple_Poco.Models.Plaid.AccountUpdate
 {
     public class AccountUpdateRequestModel : PlaidRequestModel
     {
-        [JsonPropertyName("access_token")]
-        public string? AccessToken { get; set; }
-
         [JsonPropertyName("options")]
         public AccountIdsRequestModel? Options { get; set; }
 

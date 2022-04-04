@@ -52,7 +52,6 @@ namespace TooSimple_Managers.Budgeting
         /// This is provided for unit testing purposes.
         /// Optional parameter that can be ignored when calling outside unit tests.
         /// </param>
-        /// <returns></returns>
         public async Task UpdateBudgetByUserId(string userId, DateTime? today = null)
         {
             today = today.HasValue

@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using System.Text.Json;
+using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.Plaid.AccountUpdate;
+using TooSimple_Poco.Models.Plaid.Transactions;
 using TooSimple_Poco.Settings;
 
 namespace TooSimple_DataAccessors.Plaid.AccountUpdate
@@ -16,7 +18,10 @@ namespace TooSimple_DataAccessors.Plaid.AccountUpdate
         /// <see cref="AccountUpdateRequestModel"/> containing access token
         /// & account IDs to update.
         /// </param>
-        /// <returns></returns>
+        /// <returns>
+        /// <see cref="AccountUpdateResponseModel"/>
+        /// Response model with new account balancs.
+        /// </returns>
         public async Task<AccountUpdateResponseModel> UpdateAccountBalancesAsync(
             AccountUpdateRequestModel requestModel)
         {
@@ -35,6 +40,36 @@ namespace TooSimple_DataAccessors.Plaid.AccountUpdate
                     response.Content.ReadAsStream());
 
             return responseModel ?? new AccountUpdateResponseModel();
+        }
+
+        /// <summary>
+        /// Calls plaid to get transactions for account Ids.
+        /// </summary>
+        /// <param name="requestModel">
+        /// <see cref="TransactionUpdateRequestModel"/> containing access token
+        /// & account Ids to update.
+        /// </param>
+        /// <returns>
+        /// <see cref="AccountUpdateResponseModel"/> with new transactions.
+        /// </returns>
+        public async Task<TransactionUpdateResponseModel> GetPlaidTransactionsAsync(
+            TransactionUpdateRequestModel requestModel)
+        {
+            string json = JsonSerializer.Serialize(requestModel);
+            StringContent stringContent = new(
+                json,
+                Encoding.UTF8,
+                "application/json");
+
+            HttpResponseMessage response = await _httpClient.PostAsync(
+                $"{PlaidSettings.BaseUrl}/accounts/transactions/get",
+                stringContent);
+
+            TransactionUpdateResponseModel? responseModel = await JsonSerializer
+                .DeserializeAsync<TransactionUpdateResponseModel>(
+                    response.Content.ReadAsStream());
+
+            return responseModel ?? new TransactionUpdateResponseModel();
         }
     }
 }

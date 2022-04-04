@@ -7,7 +7,7 @@ namespace TooSimple_Poco.Models.Shared
         public string? ErrorMessage { get; set; }
         public string? SuccessMessage { get; set; }
 
-        public static DatabaseResponseModel CreateSuccess(string successMessage = null)
+        public static DatabaseResponseModel CreateSuccess(string? successMessage = null)
         {
             DatabaseResponseModel responseModel = new()
             {
