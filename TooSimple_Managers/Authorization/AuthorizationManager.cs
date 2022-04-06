@@ -117,7 +117,7 @@ namespace TooSimple_Managers.Authorization
                 return jwtDto;
             }
 
-            UserAccountDataModel user = await _userAccountAccessor
+            UserAccountDataModel? user = await _userAccountAccessor
                 .GetUserAccountAsync(userDto.UserName.ToUpper());
 
             if (user is null)

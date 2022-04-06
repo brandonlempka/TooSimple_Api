@@ -6,7 +6,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
     public interface IUserAccountAccessor
 	{
 		Task<DatabaseResponseModel> RegisterUserAsync(UserAccountDataModel userAccount);
-		Task<UserAccountDataModel> GetUserAccountAsync(string normalizedEmailAddress);
+		Task<UserAccountDataModel?> GetUserAccountAsync(string normalizedEmailAddress);
 	}
 }
 
