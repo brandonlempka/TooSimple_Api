@@ -9,6 +9,7 @@ using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_DataAccessors.Database.Logging;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_DataAccessors.Plaid.TokenExchange;
+using TooSimple_Managers.Authorization;
 using TooSimple_Managers.Budgeting;
 using TooSimple_Managers.Goals;
 using TooSimple_Managers.Plaid.AccountUpdate;
@@ -57,11 +58,13 @@ builder.Services.AddTransient<IPlaidAccountUpdateAccessor, PlaidAccountUpdateAcc
 builder.Services.AddTransient<IAccountAccessor, AccountAccessor>();
 builder.Services.AddTransient<IGoalAccessor, GoalAccessor>();
 builder.Services.AddTransient<ILoggingAccessor, LoggingAccessor>();
+builder.Services.AddTransient<IUserAccountAccessor, UserAccountAccessor>();
 
 builder.Services.AddTransient<ITokenExchangeManager, TokenExchangeManager>();
 builder.Services.AddTransient<IAccountUpdateManager, AccountUpdateManager>();
 builder.Services.AddTransient<IBudgetingManager, BudgetingManager>();
 builder.Services.AddTransient<IGoalManager, GoalManager>();
+builder.Services.AddTransient<IAuthorizationManager, AuthorizationManager>();
 
 var app = builder.Build();
 

@@ -1,7 +1,10 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using System.Data;
+using TooSimple_Poco.Models.Auth;
 using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_DataAccessors.Database.Accounts
 {
@@ -12,6 +15,68 @@ namespace TooSimple_DataAccessors.Database.Accounts
         public UserAccountAccessor(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("TooSimpleMySql");
+        }
+
+        public async Task<DatabaseResponseModel> RegisterUserAsync(UserAccountDataModel userAccount)
+        {
+            using MySqlConnection connection = new(_connectionString);
+            await connection.OpenAsync();
+            using IDbTransaction transaction = connection.BeginTransaction();
+
+            try
+            {
+                string query = @"insert into UserAccounts 
+                                (
+                                    UserAccountId
+                                    , UserName
+                                    , NormalizedUserName
+                                    , Email
+                                    , NormalizedEmail
+                                    , IsEmailConfirmed
+                                    , PasswordHash
+                                    , PasswordSalt
+                                    , IsTwoFactorEnabled
+                                    , FailedLoginCount
+                                )
+                                values 
+                                (
+                                    @UserAccountId
+                                    , @UserName
+                                    , @NormalizedUserName
+                                    , @Email
+                                    , @NormalizedEmail
+                                    , @IsEmailConfirmed
+                                    , @PasswordHash
+                                    , @PasswordSalt
+                                    , @IsTwoFactorEnabled
+                                    , @FailedLoginCount
+                                );";
+
+                await connection.ExecuteAsync(
+                    query,
+                    new
+                    {
+                        userAccount.UserAccountId,
+                        userAccount.UserName,
+                        userAccount.NormalizedUserName,
+                        userAccount.Email,
+                        userAccount.NormalizedEmail,
+                        userAccount.IsEmailConfirmed,
+                        userAccount.PasswordHash,
+                        userAccount.PasswordSalt,
+                        userAccount.IsTwoFactorEnabled,
+                        userAccount.FailedLoginCount,
+                    },
+                    transaction);
+
+                transaction.Commit();
+                return DatabaseResponseModel.CreateSuccess();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return DatabaseResponseModel.CreateError(ex);
+            }
         }
 
         /// <summary>
@@ -36,11 +101,12 @@ namespace TooSimple_DataAccessors.Database.Accounts
                     , NormalizedEmail
                     , IsEmailConfirmed
                     , PasswordHash
+                    , PasswordSalt
                     , PhoneNumber
                     , IsPhoneConfirmed
                     , IsTwoFactorEnabled
                     , FailedLoginCount
-                    FROM UserAccounts;
+                    FROM UserAccounts
                     WHERE NormalizedEmail = @normalizedEmailAddress";
 
                 dataModel = await connection.QueryFirstOrDefaultAsync<UserAccountDataModel>(

@@ -9,6 +9,7 @@
 		public string NormalizedEmail { get; set; } = string.Empty;
 		public bool IsEmailConfirmed { get; set; }
 		public string PasswordHash { get; set; } = string.Empty;
+		public string PasswordSalt { get; set; } = string.Empty;
 		public string? PhoneNumber { get; set; }
 		public bool IsPhoneConfirmed { get; set; }
 		public bool IsTwoFactorEnabled { get; set; }

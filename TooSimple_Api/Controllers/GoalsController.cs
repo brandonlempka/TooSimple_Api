@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TooSimple_Managers.Goals;
 using TooSimple_Poco.Models.Budgeting;
 using TooSimple_Poco.Models.Database;

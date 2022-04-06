@@ -1,10 +1,12 @@
 ﻿using TooSimple_Poco.Models.Auth;
+using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Managers.Authorization
 {
     public interface IAuthorizationManager
 	{
-		Task<UserDto> LoginUserAsync(string emailAddress, string password)
+		Task<BaseHttpResponse> RegisterUserAsync(UserDto userDto);
+		Task<JwtDto> LoginUserAsync(UserDto userDto);
 	}
 }
 

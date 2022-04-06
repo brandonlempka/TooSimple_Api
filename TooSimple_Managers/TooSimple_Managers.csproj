@@ -15,7 +15,9 @@
     <None Remove="Budgeting\" />
     <None Remove="Authorization\" />
   </ItemGroup>
+
   <ItemGroup>
-    <Folder Include="Authorization\" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.16.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
   </ItemGroup>
 </Project>
