@@ -12,6 +12,7 @@ namespace TooSimple_Poco.Models.Database
         public string? NickName { get; set; }
         public decimal? CurrentBalance { get; set; }
         public decimal? AvailableBalance { get; set; }
+        public decimal? CreditLimit { get; set; }
         public string CurrencyCode { get; set; } = string.Empty;
         public string AccessToken { get; set; } = string.Empty;
         public DateTime? LastUpdated { get; set; }

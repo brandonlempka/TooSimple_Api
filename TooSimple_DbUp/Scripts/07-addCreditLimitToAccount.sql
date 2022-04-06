@@ -1,0 +1,1 @@
+﻿alter table PlaidAccounts add column CreditLimit decimal(18,2)

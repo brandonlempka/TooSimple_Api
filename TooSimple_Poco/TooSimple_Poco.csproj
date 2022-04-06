@@ -6,4 +6,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Models\Budgeting\" />
+    <None Remove="Models\Plaid\Transactions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\Budgeting\" />
+    <Folder Include="Models\Plaid\Transactions\" />
+  </ItemGroup>
 </Project>

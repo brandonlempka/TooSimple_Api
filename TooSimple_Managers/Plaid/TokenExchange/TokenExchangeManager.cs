@@ -1,5 +1,6 @@
 ﻿using TooSimple_DataAccessors.Plaid.TokenExchange;
 using TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels;
+using System.Net;
 
 namespace TooSimple_Managers.Plaid.TokenExchange
 {
@@ -22,15 +23,32 @@ namespace TooSimple_Managers.Plaid.TokenExchange
         /// <returns>Dto with plaid link token.</returns>
         public async Task<CreateLinkTokenDto> GetCreateLinkTokenAsync(string userId)
         {
-            var plaidResponse = await _tokenExchangeAccessor.CreateLinkTokenAsync(userId);
-            if (plaidResponse is null)
+            CreateLinkTokenResponseModel plaidResponse = await _tokenExchangeAccessor.
+                CreateLinkTokenAsync(userId);
+
+            if (string.IsNullOrWhiteSpace(plaidResponse.LinkToken))
             {
-                return new CreateLinkTokenDto();
+                CreateLinkTokenDto errorResponse = new()
+                {
+                    ErrorMessage = "Unable to contact plaid at this time.",
+                    Success = false,
+                    Status = HttpStatusCode.InternalServerError
+                };
+
+                if (plaidResponse is not null
+                    && !string.IsNullOrWhiteSpace(plaidResponse.ErrorMessage))
+                {
+                    errorResponse.ErrorMessage = plaidResponse.ErrorMessage;
+                }
+
+                return errorResponse;
             }
 
             CreateLinkTokenDto responseDto = new()
             {
-                LinkToken = plaidResponse.LinkToken
+                LinkToken = plaidResponse.LinkToken,
+                Success = true,
+                Status = HttpStatusCode.OK
             };
 
             return responseDto;

@@ -1,6 +1,8 @@
-﻿namespace TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels
+﻿using TooSimple_Poco.Models.Shared;
+
+namespace TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels
 {
-    public class CreateLinkTokenDto
+    public class CreateLinkTokenDto : BaseHttpResponse
     {
         public string? LinkToken { get; set; }
     }

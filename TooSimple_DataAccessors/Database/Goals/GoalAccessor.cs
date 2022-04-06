@@ -3,6 +3,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_DataAccessors.Database.Goals
 {
@@ -15,9 +16,18 @@ namespace TooSimple_DataAccessors.Database.Goals
             _connectionString = configuration.GetConnectionString("TooSimpleMySql");
         }
 
+        /// <summary>
+        /// Retrieves goals from database by user id.
+        /// </summary>
+        /// <param name="userId">
+        /// User ID to run against.
+        /// </param>
+        /// <returns>
+        /// IEnumerable of Goals.
+        /// </returns>
         public async Task<IEnumerable<GoalDataModel>> GetGoalsByUserIdAsync(string userId)
         {
-            IEnumerable<GoalDataModel> goals;
+            IEnumerable<GoalDataModel> goals = Enumerable.Empty<GoalDataModel>();
             using (MySqlConnection connection = new(_connectionString))
             {
                 await connection.OpenAsync();
@@ -41,17 +51,31 @@ namespace TooSimple_DataAccessors.Database.Goals
                     , IsContributionFixed
                     , IsArchived
                     FROM Goals
-                    WHERE UserAccountId = @UserId";
+                    WHERE UserAccountId = @userId";
 
-                goals = await connection.QueryAsync<GoalDataModel>(query, new { UserId = userId });
+                goals = await connection.QueryAsync<GoalDataModel>(
+                    query
+                    , new 
+                    { 
+                        userId 
+                    });
             }
 
             return goals;
         }
 
-        public async Task<GoalDataModel> GetGoalByGoalIdAsync(string goalId)
+        /// <summary>
+        /// Gets goal by its goal ID. Returns 1 Goal.
+        /// </summary>
+        /// <param name="goalId">
+        /// Goal ID to return.
+        /// </param>
+        /// <returns>
+        /// Returns 1 Goal.
+        /// </returns>
+        public async Task<GoalDataModel?> GetGoalByGoalIdAsync(string goalId)
         {
-            GoalDataModel goal;
+            GoalDataModel goal = new();
             using (MySqlConnection connection = new(_connectionString))
             {
                 await connection.OpenAsync();
@@ -77,13 +101,123 @@ namespace TooSimple_DataAccessors.Database.Goals
                     FROM Goals
                     WHERE GoalId = @GoalId";
 
-                goal = await connection.QueryFirstOrDefaultAsync<GoalDataModel>(query, new { GoalId = goalId });
+                goal = await connection.QueryFirstOrDefaultAsync<GoalDataModel>(
+                    query, 
+                    new 
+                    { 
+                        GoalId = goalId 
+                    });
             }
 
             return goal;
         }
 
-        public async Task<bool> UpdateGoalAsync(GoalDataModel goal)
+        /// <summary>
+        /// Adds new goal to database.
+        /// </summary>
+        /// <param name="goalDataModel">
+        /// Goal data model from user.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/> with success or any error messages.
+        /// </returns>
+        public async Task<DatabaseResponseModel> AddNewGoalAsync(GoalDataModel goalDataModel)
+        {
+            using MySqlConnection connection = new(_connectionString);
+            await connection.OpenAsync();
+            using IDbTransaction transaction = connection.BeginTransaction();
+
+            try
+            {
+                string query = @"insert into Goals
+                            (
+                                  GoalId
+                                , GoalName
+                                , GoalAmount
+                                , DesiredCompletionDate
+                                , UserAccountId
+                                , FundingScheduleId
+                                , IsExpense
+                                , RecurrenceTimeFrame
+                                , CreationDate
+                                , IsPaused
+                                , AutoSpendMerchantName
+                                , AmountContributed
+                                , AmountSpent
+                                , IsAutoRefillEnabled
+                                , NextContributionAmount
+                                , NextContributionDate
+                                , IsContributionFixed
+                                , IsArchived
+                            )
+                            values
+                            (
+                                  @GoalId
+                                , @GoalName
+                                , @GoalAmount
+                                , @DesiredCompletionDate
+                                , @UserAccountId
+                                , @FundingScheduleId
+                                , @IsExpense
+                                , @RecurrenceTimeFrame
+                                , @CreationDate
+                                , @IsPaused
+                                , @AutoSpendMerchantName
+                                , @AmountContributed
+                                , @AmountSpent
+                                , @IsAutoRefillEnabled
+                                , @NextContributionAmount
+                                , @NextContributionDate
+                                , @IsContributionFixed
+                                , @IsArchived
+                            );";
+
+                await connection.ExecuteAsync(
+                    query,
+                    new
+                    {
+                        GoalId = Guid.NewGuid(),
+                        goalDataModel.GoalName,
+                        goalDataModel.GoalAmount,
+                        goalDataModel.DesiredCompletionDate,
+                        goalDataModel.UserAccountId,
+                        goalDataModel.FundingScheduleId,
+                        goalDataModel.IsExpense,
+                        goalDataModel.RecurrenceTimeFrame,
+                        goalDataModel.CreationDate,
+                        goalDataModel.IsPaused,
+                        goalDataModel.AutoSpendMerchantName,
+                        goalDataModel.AmountContributed,
+                        goalDataModel.AmountSpent,
+                        goalDataModel.IsAutoRefillEnabled,
+                        goalDataModel.NextContributionAmount,
+                        goalDataModel.NextContributionDate,
+                        goalDataModel.IsContributionFixed,
+                        goalDataModel.IsArchived,
+                    },
+                    transaction);
+
+                transaction.Commit();
+                return DatabaseResponseModel.CreateSuccess();
+
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return DatabaseResponseModel.CreateError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Updates a goal with new data provided by user.
+        /// </summary>
+        /// <param name="goal">
+        /// Goal with new data.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/> with success or any error messages.
+        /// </returns>
+        public async Task<DatabaseResponseModel> UpdateGoalAsync(GoalDataModel goal)
         {
             using MySqlConnection connection = new(_connectionString);
             await connection.OpenAsync();
@@ -107,51 +241,105 @@ namespace TooSimple_DataAccessors.Database.Goals
                     , IsArchived = @IsArchived
                     WHERE GoalId = @GoalId";
 
-                await connection.ExecuteAsync(query,
+                await connection.ExecuteAsync(
+                    query,
                     new
                     {
-                        GoalName = goal.GoalName,
-                        GoalAmount = goal.GoalAmount,
-                        FundingScheduleId = goal.FundingScheduleId,
-                        RecurrenceTimeFrame = goal.RecurrenceTimeFrame,
-                        IsPaused = goal.IsPaused,
-                        AutoSpendMerchantName = goal.AutoSpendMerchantName,
-                        AmountContributed = goal.AmountContributed,
-                        AmountSpent = goal.AmountSpent,
-                        IsAutoRefillEnabled = goal.IsAutoRefillEnabled,
-                        NextContributionAmount = goal.NextContributionAmount,
-                        NextContributionDate = goal.NextContributionDate,
-                        IsContributionFixed = goal.IsContributionFixed,
-                        IsArchived = goal.IsArchived,
-                        GoalId = goal.GoalId
+                        goal.GoalName,
+                        goal.GoalAmount,
+                        goal.FundingScheduleId,
+                        goal.RecurrenceTimeFrame,
+                        goal.IsPaused,
+                        goal.AutoSpendMerchantName,
+                        goal.AmountContributed,
+                        goal.AmountSpent,
+                        goal.IsAutoRefillEnabled,
+                        goal.NextContributionAmount,
+                        goal.NextContributionDate,
+                        goal.IsContributionFixed,
+                        goal.IsArchived,
+                        goal.GoalId
                     },
                     transaction);
 
                 transaction.Commit();
-                return true;
+                return DatabaseResponseModel.CreateSuccess();
 
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                return false;
+                return DatabaseResponseModel.CreateError(ex);
             }
         }
 
+        /// <summary>
+        /// Deletes a goal and removes reference from transactions.
+        /// </summary>
+        /// <param name="goalId">
+        /// Goal ID to remove.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/> with success or any error messages.
+        /// </returns>
+        public async Task<DatabaseResponseModel> DeleteGoalAsync(string goalId)
+        {
+            using MySqlConnection connection = new(_connectionString);
+            await connection.OpenAsync();
+            using IDbTransaction transaction = connection.BeginTransaction();
 
+            try
+            {
+                string goalSql = "delete from Goals where goalId = @goalId";
+                // todo once transactions are done. Also, remove from funding history?
+                // affects other goals. hmm.
+                // string transactionSql = @"update transactions"
+                    //"set "
+                await connection.ExecuteAsync(
+                    goalSql,
+                    new
+                    {
+                        goalId
+                    },
+                    transaction);
+
+                transaction.Commit();
+                return DatabaseResponseModel.CreateSuccess();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return DatabaseResponseModel.CreateError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the funding history for a goal by its goal ID.
+        /// </summary>
+        /// <param name="goalId">
+        /// Goal ID to return history for.
+        /// </param>
+        /// <returns>
+        /// IEnumerable of the history data model.
+        /// </returns>
         public async Task<IEnumerable<FundingHistoryDataModel>> GetFundingHistoryByGoalId(string goalId)
         {
-            IEnumerable<FundingHistoryDataModel> histories;
+            IEnumerable<FundingHistoryDataModel> histories = Enumerable
+                .Empty<FundingHistoryDataModel>(); ;
             using (MySqlConnection connection = new(_connectionString))
             {
-                string query = @"SELECT FundingHistoryId
-                    , SourceGoalId
-                    , DestinationGoalId
-                    , Amount
-                    , TransferDate
-                    , Note
-                    , IsAutomatedTransfer
-                    FROM FundingHistory
+                string query = @"SELECT f.FundingHistoryId
+                    , f.SourceGoalId
+                    , (SELECT GoalName FROM Goals WHERE GoalId = f.SourceGoalId)
+                        AS SourceGoalName
+                    , f.DestinationGoalId
+                    , (SELECT GoalName FROM Goals WHERE GoalId = f.DestinationGoalId)
+                        AS DestinationGoalName
+                    , f.Amount
+                    , f.TransferDate
+                    , f.Note
+                    , f.IsAutomatedTransfer
+                    FROM FundingHistory f
                     WHERE SourceGoalId = @GoalId
                     OR DestinationGoalId = @GoalId;";
 
@@ -199,10 +387,10 @@ namespace TooSimple_DataAccessors.Database.Goals
 
                     await connection.ExecuteAsync(sourceGoalQuery,
                         new
-                    {
-                        ContributionAmount = dataModel.Amount,
-                        GoalId = dataModel.SourceGoalId
-                    },
+                        {
+                            ContributionAmount = dataModel.Amount,
+                            GoalId = dataModel.SourceGoalId
+                        },
                     transaction);
 
                     string destinationGoalQuery = @"update Goals
@@ -270,7 +458,7 @@ namespace TooSimple_DataAccessors.Database.Goals
                     Amount = dataModel.Amount,
                     TransferDate = dataModel.TransferDate,
                     Note = dataModel.Note,
-                    IsAutomatedTransfer = dataModel.AutomatedTransfer
+                    IsAutomatedTransfer = dataModel.IsAutomatedTransfer
                 },
                 transaction);
 

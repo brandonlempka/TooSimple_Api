@@ -1,4 +1,5 @@
-﻿using TooSimple_DataAccessors.Database.Accounts;
+﻿using System.Net;
+using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_Poco.Enums;
 using TooSimple_Poco.Models.Database;
@@ -6,50 +7,44 @@ using TooSimple_Poco.Models.Database;
 namespace TooSimple_Managers.Budgeting
 {
     public class BudgetingManager : IBudgetingManager
-	{
-		private readonly IGoalAccessor _goalAccessor;
-		private readonly IAccountAccessor _accountAccessor;
+    {
+        private readonly IGoalAccessor _goalAccessor;
+        private readonly IAccountAccessor _accountAccessor;
 
-		public BudgetingManager(IGoalAccessor goalAccessor,
-			IAccountAccessor accountAccessor)
-		{
-			_goalAccessor = goalAccessor;
-			_accountAccessor = accountAccessor;
-		}
-
-		public async Task<IEnumerable<GoalDataModel>> GetGoalsByUserIdAsync(string userId)
+        public BudgetingManager(IGoalAccessor goalAccessor,
+            IAccountAccessor accountAccessor)
         {
-			IEnumerable<GoalDataModel> goals = await _goalAccessor.GetGoalsByUserIdAsync(userId);
-			return goals;
+            _goalAccessor = goalAccessor;
+            _accountAccessor = accountAccessor;
         }
 
-		public async Task<decimal> GetUserReadyToSpendAsync(string userId)
+        public async Task<decimal> GetUserReadyToSpendAsync(string userId)
         {
-			IEnumerable<PlaidAccountDataModel> accounts = await _accountAccessor.GetPlaidAccountsByUserIdAsync(userId);
-			IEnumerable<GoalDataModel> goals = await _goalAccessor.GetGoalsByUserIdAsync(userId);
+            IEnumerable<PlaidAccountDataModel> accounts = await _accountAccessor.GetPlaidAccountsByUserIdAsync(userId);
+            IEnumerable<GoalDataModel> goals = await _goalAccessor.GetGoalsByUserIdAsync(userId);
 
             decimal accountTotal = accounts
-				.Where(account => account.IsActiveForBudgetingFeatures
-					&& account.PlaidAccountTypeId != PlaidAccountType.CreditCard)
-				.Select(account => account.AvailableBalance)
-				.Sum() ?? 0;
+                .Where(account => account.IsActiveForBudgetingFeatures
+                    && account.PlaidAccountTypeId != PlaidAccountType.CreditCard)
+                .Select(account => account.AvailableBalance)
+                .Sum() ?? 0;
 
-			decimal creditTotal = accounts
-				.Where(account => account.IsActiveForBudgetingFeatures
-					&& account.PlaidAccountTypeId == PlaidAccountType.CreditCard)
-				.Select(account => account.CurrentBalance)
-				.Sum() ?? 0;
+            decimal creditTotal = accounts
+                .Where(account => account.IsActiveForBudgetingFeatures
+                    && account.PlaidAccountTypeId == PlaidAccountType.CreditCard)
+                .Select(account => account.CurrentBalance)
+                .Sum() ?? 0;
 
-			decimal goalTotal = goals
-				.Where(goal => !goal.IsArchived)
-				.Select(goal => GetGoalBalance(goal))
-				.Sum();
+            decimal goalTotal = goals
+                .Where(goal => !goal.IsArchived)
+                .Select(goal => GetGoalBalance(goal))
+                .Sum();
 
-			decimal readyToSpend = accountTotal - creditTotal - goalTotal;
+            decimal readyToSpend = accountTotal - creditTotal - goalTotal;
             return readyToSpend;
         }
 
-		/// <summary>
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="userId"></param>
@@ -57,26 +52,25 @@ namespace TooSimple_Managers.Budgeting
         /// This is provided for unit testing purposes.
         /// Optional parameter that can be ignored when calling outside unit tests.
         /// </param>
-        /// <returns></returns>
-		public async Task UpdateBudgetByUserId(string userId, DateTime? today = null)
+        public async Task UpdateBudgetByUserId(string userId, DateTime? today = null)
         {
-			today = today.HasValue
-				? today.Value.Date
-				: DateTime.UtcNow.Date;
+            today = today.HasValue
+                ? today.Value.Date
+                : DateTime.UtcNow.Date;
 
             IEnumerable<GoalDataModel> goals = await _goalAccessor.GetGoalsByUserIdAsync(userId);
             IEnumerable<FundingScheduleDataModel>? schedules = await _goalAccessor.GetFundingSchedulesByUserId(userId);
 
-			goals = goals.Where(goal => !goal.IsPaused);
+            goals = goals.Where(goal => !goal.IsPaused);
 
-			foreach (GoalDataModel goal in goals)
+            foreach (GoalDataModel goal in goals)
             {
-				if ((goal.DesiredCompletionDate >= today || goal.IsExpense)
-					&& goal.NextContributionDate <= today)
+                if ((goal.DesiredCompletionDate >= today || goal.IsExpense)
+                    && goal.NextContributionDate <= today)
                 {
-					foreach (FundingScheduleDataModel schedule in schedules)
+                    foreach (FundingScheduleDataModel schedule in schedules)
                     {
-						if (schedule.FundingScheduleId == goal.FundingScheduleId)
+                        if (schedule.FundingScheduleId == goal.FundingScheduleId)
                         {
                             DateTime nextContributionDate = goal.NextContributionDate;
                             decimal nextContributionAmount = 0;
@@ -84,7 +78,7 @@ namespace TooSimple_Managers.Budgeting
                             GoalDataModel currentGoal = goal;
                             IEnumerable<FundingHistoryDataModel> fundingHistory = await _goalAccessor.GetFundingHistoryByGoalId(currentGoal.GoalId);
                             IOrderedEnumerable<FundingHistoryDataModel> goalHistory = fundingHistory
-                                .Where(g => g.DestinationGoalId == goal.GoalId && g.AutomatedTransfer == true)
+                                .Where(g => g.DestinationGoalId == goal.GoalId && g.IsAutomatedTransfer == true)
                                 .OrderByDescending(g => g.TransferDate);
 
                             DateTime lastFunded = today.Value;
@@ -102,7 +96,7 @@ namespace TooSimple_Managers.Budgeting
                                 FundingHistoryDataModel requestModel = new()
                                 {
                                     Amount = currentGoal.NextContributionAmount,
-                                    AutomatedTransfer = true,
+                                    IsAutomatedTransfer = true,
                                     SourceGoalId = "0",
                                     DestinationGoalId = currentGoal.GoalId,
                                     Note = "Automatic funding from " + schedule.FundingScheduleName,
@@ -122,20 +116,20 @@ namespace TooSimple_Managers.Budgeting
                                 currentGoal.NextContributionAmount = nextContributionAmount;
                                 currentGoal.NextContributionDate = nextContributionDate;
 
-                                response = await _goalAccessor.UpdateGoalAsync(currentGoal);
-                                if (!response)
+                                var responseModel = await _goalAccessor.UpdateGoalAsync(currentGoal);
+                                if (!responseModel.Success)
                                     break;
                             }
                         }
                     }
-				}
-			}
-		}
+                }
+            }
+        }
 
-		private decimal GetGoalBalance(GoalDataModel goal)
+        private decimal GetGoalBalance(GoalDataModel goal)
         {
-			decimal goalBalance = goal.AmountContributed - goal.AmountSpent;
-			return goalBalance;
+            decimal goalBalance = goal.AmountContributed - goal.AmountSpent;
+            return goalBalance;
         }
 
         private (decimal nextContributionAmount, DateTime nextContributionDate) CalculateNextContribution(

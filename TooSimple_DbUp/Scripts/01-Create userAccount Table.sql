@@ -5,9 +5,10 @@ NormalizedUserName NVARCHAR(255) NOT NULL,
 Email NVARCHAR(255) NOT NULL,
 NormalizedEmail NVARCHAR(255) NOT NULL,
 IsEmailConfirmed BOOLEAN,
-PasswordHash CHAR(84),
+PasswordHash CHAR(88),
+PasswordSalt CHAR(88),
 PhoneNumber NVARCHAR(255),
-IsPhoneConfirmed NVARCHAR(255),
-IsTwoFactorEnabled NVARCHAR(255),
+IsPhoneConfirmed BOOLEAN(255),
+IsTwoFactorEnabled BOOLEAN(255),
 FailedLoginCount INT
 )

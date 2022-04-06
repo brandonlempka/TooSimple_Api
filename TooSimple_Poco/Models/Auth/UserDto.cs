@@ -1,4 +1,6 @@
-﻿namespace TooSimple_Poco.Models.Auth
+﻿using TooSimple_Poco.Models.Shared;
+
+namespace TooSimple_Poco.Models.Auth
 {
     public class UserDto
     {

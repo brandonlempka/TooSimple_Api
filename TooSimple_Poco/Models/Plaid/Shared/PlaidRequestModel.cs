@@ -10,6 +10,9 @@ namespace TooSimple_Poco.Models.Plaid.Shared
         [JsonPropertyName("secret")]
         public string PlaidSecret { get; set; } = string.Empty;
 
+        [JsonPropertyName("access_token")]
+        public string? AccessToken { get; set; }
+
         public PlaidRequestModel()
         {
             ClientId = PlaidSettings.ClientId;

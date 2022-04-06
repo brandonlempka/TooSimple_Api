@@ -22,4 +22,3 @@
 		public bool IsArchived { get; set; }
 	}
 }
-

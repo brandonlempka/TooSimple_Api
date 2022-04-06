@@ -13,6 +13,8 @@
     <None Remove="Scripts\03-AddGoalsTable.sql" />
     <None Remove="Scripts\04-AddMissingColumn.sql" />
     <None Remove="Scripts\05-AddItemIdToAccounts.sql" />
+    <None Remove="Scripts\07-addCreditLimitToAccount.sql" />
+    <None Remove="Scripts\08-transactions.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +24,8 @@
     <EmbeddedResource Include="Scripts\04-AddMissingColumn.sql" />
     <EmbeddedResource Include="Scripts\05-AddItemIdToAccounts.sql" />
     <EmbeddedResource Include="Scripts\06-AddLoggingAndFundingHistoryTables.sql" />
+    <EmbeddedResource Include="Scripts\07-addCreditLimitToAccount.sql" />
+    <EmbeddedResource Include="Scripts\08-transactions.sql" />
   </ItemGroup>
 
   <ItemGroup>

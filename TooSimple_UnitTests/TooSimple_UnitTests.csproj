@@ -12,6 +12,16 @@
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
     <PackageReference Include="coverlet.collector" Version="3.1.0" />
+    <PackageReference Include="Moq" Version="4.17.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Budgeting\" />
+    <None Remove="Budgeting\Goals\" />
+    <None Remove="Moq" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TooSimple_DataAccessors\TooSimple_DataAccessors.csproj" />
+    <ProjectReference Include="..\TooSimple_Managers\TooSimple_Managers.csproj" />
+  </ItemGroup>
 </Project>

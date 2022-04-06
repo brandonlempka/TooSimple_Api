@@ -6,24 +6,26 @@ using TooSimple_Managers.Budgeting;
 using TooSimple_Poco.Enums;
 using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.Plaid.AccountUpdate;
+using TooSimple_Poco.Models.Plaid.Transactions;
 using TooSimple_Poco.Models.Plaid.Webhooks;
+using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Managers.Plaid.AccountUpdate
 {
     public class AccountUpdateManager : IAccountUpdateManager
     {
-        private readonly IAccountUpdateAccessor _accountUpdateAccessor;
+        private readonly IPlaidAccountUpdateAccessor _plaidAccountAccessor;
         private readonly IAccountAccessor _accountAccessor;
         private readonly ILoggingAccessor _loggingAccessor;
         private readonly IBudgetingManager _budgetingManager;
 
         public AccountUpdateManager(
-            IAccountUpdateAccessor accountUpdateAccessor,
+            IPlaidAccountUpdateAccessor plaidAccountAccessor,
             IAccountAccessor accountAccessor,
             ILoggingAccessor loggingAccessor,
             IBudgetingManager budgetingManager)
         {
-            _accountUpdateAccessor = accountUpdateAccessor;
+            _plaidAccountAccessor = plaidAccountAccessor;
             _accountAccessor = accountAccessor;
             _loggingAccessor = loggingAccessor;
             _budgetingManager = budgetingManager;
@@ -33,58 +35,57 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
         /// Calls plaid to update account balances.
         /// </summary>
         /// <param name="userId">Too Simple user Id to update.</param>
-        /// <returns>Boolean indicating success.</returns>
-        public async Task<bool> UpdateAccountBalancesByUserIdAsync(string userId)
+        /// <see cref="DatabaseResponseModel"/>
+        /// Database response indicating success or failure.
+        /// </returns>
+        public async Task<DatabaseResponseModel> UpdateAccountBalancesByUserIdAsync(string userId)
         {
-            IEnumerable<PlaidAccountDataModel> plaidAccounts = await _accountAccessor.GetPlaidAccountsByUserIdAsync(userId);
-            if (plaidAccounts is null || !plaidAccounts.Any())
-            {
-                return false;
-            }
+            IEnumerable<IGrouping<string, PlaidAccountDataModel>>? accountGroups = await GetAccountTokenGroups(userId);
 
-            IEnumerable<
-                IGrouping<string, PlaidAccountDataModel>> accountGroups = plaidAccounts.GroupBy(account => account.AccessToken);
+            if (accountGroups is null)
+                return DatabaseResponseModel.CreateError("Something went wrong while retrieving accounts from database.");
 
             foreach (IGrouping<string, PlaidAccountDataModel> group in accountGroups)
             {
                 string accessToken = group.Key;
                 string[] accountIds = group
-                    .Where(account => !account.IsActiveForBudgetingFeatures)
+                    .Where(account => !account.IsPlaidRelogRequired)
                     .Select(account => account.PlaidAccountId)
                     .ToArray();
 
-                bool response = await PlaidBalanceUpdate(accessToken, accountIds);
+                DatabaseResponseModel response = await PlaidBalanceUpdate(accessToken, accountIds);
                 return response;
             }
 
-            return true;
+            return DatabaseResponseModel.CreateError("Something went wrong.");
         }
 
         /// <summary>
         /// Calls plaid to update account balances.
         /// </summary>
         /// <param name="userId">Plaid accountId to update.</param>
-        /// <returns>Boolean indicating success.</returns>
-        public async Task<bool> UpdateAccountBalancesByItemIdAsync(JsonElement json)
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/>
+        /// Database response indicating success or failure.
+        /// </returns>
+        public async Task<DatabaseResponseModel> UpdateAccountBalancesByItemIdAsync(JsonElement json)
         {
-            bool response = false;
             PlaidWebhookResponseDto? webhookResponse = JsonSerializer.Deserialize<PlaidWebhookResponseDto>(json);
 
             if (webhookResponse is null)
-            {
-                return response;
-            }
+                return DatabaseResponseModel.CreateError("Something went wrong while processing webhook.");
 
-            string? errorCode = null;
-            
+
             // todo
             // I'm not sure what else I'm likely to get, but probably need to handle this if
             // a lot of these come through 
             if (webhookResponse.WebhookType != PlaidWebhookType.TRANSACTIONS.ToString()
                 || webhookResponse.WebhookCode != PlaidWebhookCode.DEFAULT_UPDATE.ToString())
             {
-                response = await _loggingAccessor.LogMessageAsync(errorCode, json.ToString());
-                return response;
+                bool response = await _loggingAccessor.LogMessageAsync(json.ToString(), null);
+                return response
+                    ? DatabaseResponseModel.CreateSuccess()
+                    : DatabaseResponseModel.CreateError("Failure while logging response.");
             }
 
             if (webhookResponse.WebhookCode == PlaidWebhookCode.DEFAULT_UPDATE.ToString()
@@ -94,18 +95,16 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                     .GetPlaidAccountsByItemIdAsync(webhookResponse.ItemId);
 
                 if (plaidAccount is null || plaidAccount.IsPlaidRelogRequired)
-                {
-                    return response;
-                }
+                    return DatabaseResponseModel.CreateError("Something went wrong.");
 
                 string[] accountId =
                 {
                     plaidAccount.PlaidAccountId
                 };
 
-                response = await PlaidBalanceUpdate(plaidAccount.AccessToken, accountId);
+                DatabaseResponseModel response = await PlaidBalanceUpdate(plaidAccount.AccessToken, accountId);
 
-                if (response)
+                if (response.Success)
                 {
                     await _budgetingManager.UpdateBudgetByUserId(plaidAccount.UserAccountId);
                 }
@@ -113,31 +112,144 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                 return response;
             }
 
-            return response;
+            return DatabaseResponseModel.CreateError("Got something unusual from plaid");
         }
 
-        private async Task<bool> PlaidBalanceUpdate(string accessToken, string[] accountIds)
+        /// <summary>
+        /// Calls plaid to get new transactions.
+        /// </summary>
+        /// <param name="userId">
+        /// String user Id to get new transactions for.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/>
+        /// Database response indicating success or failure.
+        /// </returns>
+        public async Task<DatabaseResponseModel> GetNewTransactionsAsync(string userId)
+        {
+            IEnumerable<IGrouping<string, PlaidAccountDataModel>>? accountGroups = await GetAccountTokenGroups(userId);
+
+            if (accountGroups is null)
+                return DatabaseResponseModel.CreateError("Something went wrong while retrieving accounts from database.");
+
+            foreach (IGrouping<string, PlaidAccountDataModel> group in accountGroups)
+            {
+                string accessToken = group.Key;
+                string[] accountIds = group
+                    .Where(account => !account.IsPlaidRelogRequired)
+                    .Select(account => account.PlaidAccountId)
+                    .ToArray();
+
+                DatabaseResponseModel response = await PlaidBalanceUpdate(accessToken, accountIds);
+            }
+
+            return DatabaseResponseModel.CreateSuccess();
+        }
+
+        private async Task<IEnumerable<IGrouping<string, PlaidAccountDataModel>>?> GetAccountTokenGroups(string userId)
+        {
+            IEnumerable<PlaidAccountDataModel> plaidAccounts = await _accountAccessor.GetPlaidAccountsByUserIdAsync(userId);
+            if (plaidAccounts is null || !plaidAccounts.Any())
+                return null;
+
+            IEnumerable<
+                IGrouping<string, PlaidAccountDataModel>> accountGroups = plaidAccounts.GroupBy(account => account.AccessToken);
+
+            return accountGroups;
+        }
+
+        private async Task<DatabaseResponseModel> PlaidBalanceUpdate(string accessToken, string[] accountIds)
         {
             AccountUpdateRequestModel requestModel = new(
                 accessToken,
                 accountIds);
 
-            AccountUpdateResponseModel plaidUpdateResponse = await _accountUpdateAccessor
+            AccountUpdateResponseModel plaidUpdateResponse = await _plaidAccountAccessor
                 .UpdateAccountBalancesAsync(requestModel);
 
             if (plaidUpdateResponse is null)
-            {
-                return false;
-            }
+                return DatabaseResponseModel.CreateError("Something went wrong while contacting plaid.");
 
             if (plaidUpdateResponse.ErrorCode == PlaidErrorCodes.ITEM_LOGIN_REQUIRED.ToString())
             {
-                bool lockResponse = await _accountAccessor.UpdateAccountRelogAsync(true, accountIds);
+                DatabaseResponseModel lockResponse = await _accountAccessor.UpdateAccountRelogAsync(true, accountIds);
                 return lockResponse;
             }
 
-            bool response = await _accountAccessor.UpdateAccountBalancesAsync(plaidUpdateResponse);
+            DatabaseResponseModel response = await _accountAccessor.UpdateAccountBalancesAsync(plaidUpdateResponse);
             return response;
+        }
+
+        private async Task<DatabaseResponseModel> SaveNewPlaidTransactions(
+            string accessToken,
+            string[] accountIds,
+            string userAccountId)
+        {
+            TransactionUpdateRequestModel requestModel = new(
+                accessToken,
+                accountIds);
+
+            TransactionUpdateResponseModel? transactionResponseModel = await _plaidAccountAccessor
+                .GetPlaidTransactionsAsync(requestModel);
+
+            if (transactionResponseModel is null
+                || transactionResponseModel.Accounts is null
+                || transactionResponseModel.Transactions is null)
+                return DatabaseResponseModel.CreateError("Something went wrong while contacting plaid.");
+
+            if (transactionResponseModel.ErrorCode == PlaidErrorCodes.ITEM_LOGIN_REQUIRED.ToString())
+            {
+                DatabaseResponseModel lockResponse = await _accountAccessor.UpdateAccountRelogAsync(true, accountIds);
+                return lockResponse;
+            }
+
+            IEnumerable<TransactionDataModel> transactions = transactionResponseModel.Accounts
+                .Join(transactionResponseModel.Transactions,
+                    a => a.AccountId,
+                    t => t.AccountId,
+                    (account, transaction) => new TransactionDataModel
+                    {
+                        AccountOwner = transaction.AccountOwner,
+                        Amount = transaction.Amount.HasValue
+                            ? Convert.ToDecimal(transaction.Amount)
+                            : 0M,
+                        AuthorizedDate = transaction.AuthorizedDateTime,
+                        CategoryId = transaction.CategoryId,
+                        Address = transaction.Location?.Address,
+                        City = transaction.Location?.City,
+                        PostalCode = transaction.Location?.PostalCode,
+                        Country = transaction.Location?.Country,
+                        Region = transaction.Location?.Region,
+                        Latitude = transaction.Location?.Latitude,
+                        Longitude = transaction.Location?.Longitude,
+                        StoreNumber = transaction.Location?.StoreNumber,
+                        CurrencyCode = transaction.IsoCurrencyCode ?? string.Empty,
+                        DetailedCategory = transaction.PersonalFinanceCategory?.Detailed,
+                        PrimaryCategory = transaction.PersonalFinanceCategory?.Primary,
+                        PlaidAccountId = transaction.AccountId,
+                        PlaidTransactionId = transaction.TransactionId,
+                        UserAccountId = userAccountId,
+                        IsPending = transaction.IsPending,
+                        PendingTransactionId = transaction.PendingTransactionId,
+                        MerchantName = transaction.MerchantName,
+                        Name = transaction.Name,
+                        Payee = transaction.PaymentMeta?.Payee,
+                        Payer = transaction.PaymentMeta?.Payer,
+                        PaymentMethod = transaction.PaymentMeta?.PaymentMethod,
+                        PaymentProcessor = transaction.PaymentMeta?.PaymentProcessor,
+                        ByOrderOf = transaction.PaymentMeta?.ByOrderOf,
+                        PaymentChannel = transaction.PaymentChannel,
+                        PpdId = transaction.PaymentMeta?.PpdId,
+                        Reason = transaction.PaymentMeta?.Reason,
+                        ReferenceNumber = transaction.PaymentMeta?.ReferenceNumber,
+                        SpendingFromGoalId = null,
+                        TransactionCode = transaction.TransactionCode,
+                        TransactionDate = transaction.Date ?? DateTime.UtcNow,
+                        TransactionType = transaction.TransactionType
+                    });
+
+            DatabaseResponseModel databaseResponseModel = await _accountAccessor.UpsertPlaidTransactionsAsync(transactions);
+            return databaseResponseModel;
         }
     }
 }
