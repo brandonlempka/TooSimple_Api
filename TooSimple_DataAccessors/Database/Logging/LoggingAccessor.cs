@@ -14,7 +14,7 @@ namespace TooSimple_DataAccessors.Database.Logging
             _connectionString = configuration.GetConnectionString("TooSimpleMySql");
         }
 
-        public async Task<bool> LogMessageAsync(string? errorCode, string message)
+        public async Task<bool> LogMessageAsync(string message, string? errorCode)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -45,7 +45,7 @@ namespace TooSimple_DataAccessors.Database.Logging
                         transaction.Commit();
                         return true;
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         transaction.Rollback();
                         return false;

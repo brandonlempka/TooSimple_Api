@@ -19,9 +19,13 @@
     <None Remove="Budgeting\" />
     <None Remove="Budgeting\Goals\" />
     <None Remove="Moq" />
+    <None Remove="Auth\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TooSimple_DataAccessors\TooSimple_DataAccessors.csproj" />
     <ProjectReference Include="..\TooSimple_Managers\TooSimple_Managers.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Auth\" />
   </ItemGroup>
 </Project>

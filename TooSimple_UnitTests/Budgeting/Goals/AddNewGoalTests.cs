@@ -87,7 +87,9 @@ namespace TooSimple_UnitTests.Budgeting.Goals
             Assert.AreEqual(response.Status, HttpStatusCode.BadRequest);
             // Have to subtract 1 from number of expected errors since I'm counting
             // the commas.
-            Assert.AreEqual(response.ErrorMessage.Count(c => c == ','), numberOfErrors -1);
+            Assert.AreEqual(
+                response.ErrorMessage.Count(c => c == ','),
+                numberOfErrors -1);
         }
 
         [TestMethod]

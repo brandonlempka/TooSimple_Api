@@ -8,6 +8,8 @@ using System.Net;
 using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.Shared;
+using System.Text;
+using System.ComponentModel.DataAnnotations;
 
 namespace TooSimple_Managers.Authorization
 {
@@ -24,12 +26,27 @@ namespace TooSimple_Managers.Authorization
             _userAccountAccessor = userAccountAccessor;
         }
 
-        public async Task<BaseHttpResponse> RegisterUserAsync(UserDto userDto)
+        /// <summary>
+        /// Creates a new user account and returns json web token for auth.
+        /// </summary>
+        /// <param name="userDto">
+        /// Username and password for new user.
+        /// </param>
+        /// <returns>
+        /// <see cref="JwtDto"/> containg bearer token.
+        /// </returns>
+        public async Task<JwtDto> RegisterUserAsync(UserDto userDto)
         {
-            BaseHttpResponse response = ValidateUserDto(userDto);
-            if (!response.Success)
+            JwtDto jwtDto = new();
+
+            BaseHttpResponse validationResult = ValidateUserDto(userDto);
+
+            if (!validationResult.Success)
             {
-                return response;
+                jwtDto.Success = false;
+                jwtDto.ErrorMessage = validationResult.ErrorMessage;
+                jwtDto.Status = validationResult.Status;
+                return jwtDto;
             }
 
             string normalizedEmail = userDto.UserName.ToUpper();
@@ -41,10 +58,10 @@ namespace TooSimple_Managers.Authorization
 
             if (passwordHash is null || passwordSalt is null)
             {
-                response.Success = false;
-                response.Status = HttpStatusCode.InternalServerError;
-                response.ErrorMessage = "Something went wrong while registering user.";
-                return response;
+                jwtDto.Success = false;
+                jwtDto.Status = HttpStatusCode.InternalServerError;
+                jwtDto.ErrorMessage = "Something went wrong while registering user.";
+                return jwtDto;
             }
 
             UserAccountDataModel newUser = new()
@@ -65,17 +82,28 @@ namespace TooSimple_Managers.Authorization
             
             if (!dbResponse.Success)
             {
-                response.Success = false;
-                response.Status = HttpStatusCode.InternalServerError;
-                response.ErrorMessage = dbResponse.ErrorMessage;
-                return response;
+                jwtDto.Success = false;
+                jwtDto.Status = HttpStatusCode.InternalServerError;
+                jwtDto.ErrorMessage = dbResponse.ErrorMessage;
+                return jwtDto;
             }
 
-            response.Success = true;
-            response.Status = HttpStatusCode.Created;
-            return response;
+            string token = CreateToken(newUser);
+            jwtDto.BearerToken = token;
+            jwtDto.Success = true;
+            jwtDto.Status = HttpStatusCode.Created;
+            return jwtDto;
         }
 
+        /// <summary>
+        /// Verifies username & password are correct and returns jwt for auth.
+        /// </summary>
+        /// <param name="userDto">
+        /// Username and password for new user.
+        /// </param>
+        /// <returns>
+        /// <see cref="JwtDto"/> containg bearer token.
+        /// </returns>
         public async Task<JwtDto> LoginUserAsync(UserDto userDto)
         {
             JwtDto jwtDto = new();
@@ -118,6 +146,15 @@ namespace TooSimple_Managers.Authorization
             return jwtDto;
         }
 
+        /// <summary>
+        /// Validates the user is sending good data.
+        /// </summary>
+        /// <param name="userDto">
+        /// Username & password.
+        /// </param>
+        /// <returns>
+        /// BaseHttpResponse of errors.
+        /// </returns>
         private static BaseHttpResponse ValidateUserDto(UserDto userDto)
         {
             List<string> errors = new();
@@ -136,6 +173,15 @@ namespace TooSimple_Managers.Authorization
             {
                 errors.Add("Username is required.");
             }
+            else
+            {
+                userDto.UserName = userDto.UserName.Trim();
+                if(!new EmailAddressAttribute()
+                    .IsValid(userDto.UserName))
+                {
+                    errors.Add($"{userDto.UserName} is not a valid email address.");
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(userDto.Password))
             {
@@ -153,6 +199,20 @@ namespace TooSimple_Managers.Authorization
             return response;
         }
 
+        /// <summary>
+        /// Creates password hash & salt byte[] for password storage.
+        /// </summary>
+        /// <param name="password">
+        /// User provided password to salt & hash.
+        /// </param>
+        /// <param name="passwordHash">
+        /// Password hash byte array.
+        /// Returned via out for immediate access without assignment.
+        /// </param>
+        /// <param name="passwordSalt">
+        /// Password salt byte array.
+        /// Returned via out for immediate access without assignment.
+        /// </param>
         private static void CreatePasswordHash(
             string password,
             out byte[] passwordHash,
@@ -160,19 +220,43 @@ namespace TooSimple_Managers.Authorization
         {
             using var hmac = new HMACSHA512();
             passwordSalt = hmac.Key;
-            passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
         }
 
+        /// <summary>
+        /// Rehashes password with salt to see if password matches user submission.
+        /// </summary>
+        /// <param name="password">
+        /// User provided password to verify matches password hash.
+        /// </param>
+        /// <param name="passwordHash">
+        /// Password hash byte array from database.
+        /// </param>
+        /// <param name="passwordSalt">
+        /// Password salt byte array from database.
+        /// </param>
+        /// <returns>
+        /// Boolean indicating password is correct or incorrect.
+        /// </returns>
         private static bool VerifyPasswordHash(
             string password,
             byte[] passwordHash,
             byte[] passwordSalt)
         {
             using var hmac = new HMACSHA512(passwordSalt);
-            var computeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            var computeHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             return computeHash.SequenceEqual(passwordHash);
         }
 
+        /// <summary>
+        /// Creates Json web token with user account id & username claims.
+        /// </summary>
+        /// <param name="user">
+        /// User to create token for.
+        /// </param>
+        /// <returns>
+        /// String of Json web token.
+        /// </returns>
         private string CreateToken(UserAccountDataModel user)
         {
             List<Claim> claims = new()
@@ -185,18 +269,21 @@ namespace TooSimple_Managers.Authorization
                     user.UserName)
             };
 
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
+            SymmetricSecurityKey key = new(
+                Encoding.UTF8.GetBytes(
                 _configuration.GetSection("AppSettings:Token").Value));
 
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            SigningCredentials credentials = new(
+                key,
+                SecurityAlgorithms.HmacSha512Signature);
 
-            var token = new JwtSecurityToken(
+            JwtSecurityToken token = new(
                 claims: claims,
                 expires: DateTime.UtcNow.AddDays(1),
-                signingCredentials: creds
+                signingCredentials: credentials
                 );
 
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
         }
     }

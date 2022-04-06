@@ -1,9 +1,9 @@
 ﻿CREATE TABLE UserAccounts (
 UserAccountId CHAR(40) NOT NULL PRIMARY KEY,
 UserName NVARCHAR(255) NOT NULL,
-NormalizedUserName NVARCHAR(255) NOT NULL,
+NormalizedUserName NVARCHAR(255) NOT NULL UNIQUE,
 Email NVARCHAR(255) NOT NULL,
-NormalizedEmail NVARCHAR(255) NOT NULL,
+NormalizedEmail NVARCHAR(255) NOT NULL UNIQUE,
 IsEmailConfirmed BOOLEAN,
 PasswordHash CHAR(88),
 PasswordSalt CHAR(88),
