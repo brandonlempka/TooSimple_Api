@@ -13,5 +13,9 @@
 
   <ItemGroup>
     <None Remove="Budgeting\" />
+    <None Remove="Authorization\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Authorization\" />
   </ItemGroup>
 </Project>

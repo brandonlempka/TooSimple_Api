@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TooSimple_Managers.Goals;
 using TooSimple_Poco.Models.Budgeting;
 using TooSimple_Poco.Models.Database;
@@ -8,6 +9,7 @@ namespace TooSimple_Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class GoalsController : Controller
     {
         private readonly IGoalManager _goalManager;

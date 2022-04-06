@@ -4,7 +4,6 @@ using MySql.Data.MySqlClient;
 using System.Data;
 using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.Plaid.AccountUpdate;
-using TooSimple_Poco.Models.Plaid.Transactions;
 using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_DataAccessors.Database.Accounts
