@@ -17,9 +17,9 @@ namespace TooSimple_Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<BaseHttpResponse> Register(UserDto request)
+        public async Task<JwtDto> Register(UserDto request)
         {
-            BaseHttpResponse response = await _authorizationManager.RegisterUserAsync(request);
+            JwtDto response = await _authorizationManager.RegisterUserAsync(request);
             return response;
         }
 
