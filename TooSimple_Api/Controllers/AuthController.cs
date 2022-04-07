@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TooSimple_Managers.Authorization;
 using TooSimple_Poco.Models.Auth;
-using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Api.Controllers
 {
