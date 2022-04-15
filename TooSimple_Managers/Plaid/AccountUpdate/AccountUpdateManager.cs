@@ -82,7 +82,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
             if (webhookResponse.WebhookType != PlaidWebhookType.TRANSACTIONS.ToString()
                 || webhookResponse.WebhookCode != PlaidWebhookCode.DEFAULT_UPDATE.ToString())
             {
-                bool response = await _loggingAccessor.LogMessageAsync(json.ToString(), null);
+                bool response = await _loggingAccessor.LogMessageAsync(json.ToString());
                 return response
                     ? DatabaseResponseModel.CreateSuccess()
                     : DatabaseResponseModel.CreateError("Failure while logging response.");

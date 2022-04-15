@@ -279,7 +279,7 @@ namespace TooSimple_Managers.Authorization
 
             JwtSecurityToken token = new(
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddDays(30),
                 signingCredentials: credentials
                 );
 

@@ -14,7 +14,7 @@ namespace TooSimple_DataAccessors.Database.Logging
             _connectionString = configuration.GetConnectionString("TooSimpleMySql");
         }
 
-        public async Task<bool> LogMessageAsync(string message, string? errorCode)
+        public async Task<bool> LogMessageAsync(string message, string? errorCode = null)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {

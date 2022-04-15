@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using TooSimple_Managers.Goals;
 using TooSimple_Poco.Models.Budgeting;
 using TooSimple_Poco.Models.Database;
@@ -36,7 +35,6 @@ namespace TooSimple_Api.Controllers
         public async Task<GetGoalsDto> GetGoalsByUserId(string userId)
         {
             GetGoalsDto goalsDto = await _goalManager.GetGoalsByUserIdAsync(userId);
-            goalsDto.Status = System.Net.HttpStatusCode.NotFound;
             return goalsDto;
         }
 

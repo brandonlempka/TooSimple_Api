@@ -2,7 +2,6 @@
 {
     public interface ILoggingAccessor
     {
-        Task<bool> LogMessageAsync(string message, string? errorCode);
-
+        Task<bool> LogMessageAsync(string message, string? errorCode = null);
     }
 }

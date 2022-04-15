@@ -1,9 +1,11 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using TooSimple_Api.Filters;
+using TooSimple_Api.Middleware;
 using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_DataAccessors.Database.Logging;
@@ -16,6 +18,13 @@ using TooSimple_Managers.Plaid.AccountUpdate;
 using TooSimple_Managers.Plaid.TokenExchange;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(builder => builder.AddPolicy("ApiCorsPolicy", builder =>
+{
+    builder.AllowAnyOrigin();
+    builder.AllowAnyMethod();
+    builder.AllowAnyHeader();
+}));
 
 // Add services to the container.
 builder.Services.AddControllers(options => options
@@ -67,7 +76,7 @@ builder.Services.AddTransient<IGoalManager, GoalManager>();
 builder.Services.AddTransient<IAuthorizationManager, AuthorizationManager>();
 
 var app = builder.Build();
-
+app.UseCors("ApiCorsPolicy");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -75,7 +84,12 @@ if (app.Environment.IsDevelopment())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+app.UseMiddleware<ExceptionLoggerMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
