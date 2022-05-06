@@ -58,7 +58,17 @@ namespace TooSimple_Poco.Models.DataModels
             IsArchived = goal.IsArchived;
         }
 
-        public void GetNextContribution()
+        /// <summary>
+        /// Determines the next contribution amount & date.
+        /// </summary>
+        /// <param name="currentDate">
+        /// Optional parameter for unit testing against different dates.
+        /// Ignore in caller to use DateTime.UtcNow.
+        /// </param>
+        /// <exception cref="Exception">
+        /// If Funding schedule is not set correctly will throw error for logging.
+        /// </exception>
+        public void GetNextContribution(DateTime? currentDate = null)
         {
             if (FundingSchedule is null)
             {
@@ -74,7 +84,7 @@ namespace TooSimple_Poco.Models.DataModels
             if (IsExpense)
                 CalculateExpenseContributions();
 
-            DateTime now = DateTime.UtcNow.Date;
+            DateTime now = currentDate ?? DateTime.UtcNow.Date;
 
             if (now < DesiredCompletionDate.Date)
             {
