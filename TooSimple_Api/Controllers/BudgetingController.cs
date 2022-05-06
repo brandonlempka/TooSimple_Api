@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TooSimple_Managers.Budgeting;
-using TooSimple_Poco.Models.Budgeting;
 
 namespace TooSimple_Api.Controllers
 {
@@ -20,12 +19,6 @@ namespace TooSimple_Api.Controllers
         {
             decimal readyToSpend = await _budgetingManager.GetUserReadyToSpendAsync(userId);
 			return Ok(readyToSpend);
-        }
-
-		[HttpGet("updateGoalFunding")]
-		public async Task UpdateGoalFunding(string userId)
-        {
-			await _budgetingManager.UpdateBudgetByUserId(userId);
         }
  	}
 }

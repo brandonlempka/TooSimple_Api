@@ -6,8 +6,8 @@ using System.Net;
 using System.Threading.Tasks;
 using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_Managers.Authorization;
-using TooSimple_Poco.Models.Auth;
-using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.DataModels;
+using TooSimple_Poco.Models.Dtos.Auth;
 using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_UnitTests.Auth
@@ -18,7 +18,7 @@ namespace TooSimple_UnitTests.Auth
 		[TestMethod]
 		public async Task RegistrationSuccessTest()
         {
-			UserDto userDto = new()
+			UserRequestDto userDto = new()
 			{
 				UserName = "Tester@test.com",
 				Password = "This is a test"
@@ -68,7 +68,7 @@ namespace TooSimple_UnitTests.Auth
 			string password,
 			int numberOfErrors)
         {
-			UserDto userDto = new()
+			UserRequestDto userDto = new()
 			{
 				UserName = userName,
 				Password = password
@@ -110,7 +110,7 @@ namespace TooSimple_UnitTests.Auth
 		[TestMethod]
 		public async Task RegistrationDuplicateUserTest()
 		{
-			UserDto userDto = new()
+			UserRequestDto userDto = new()
 			{
 				UserName = "tester@test.com",
 				Password = "This is a test"
@@ -156,7 +156,7 @@ namespace TooSimple_UnitTests.Auth
 		[TestMethod]
 		public async Task BadEmailAddressTest()
 		{
-			UserDto userDto = new()
+			UserRequestDto userDto = new()
 			{
 				UserName = "tester",
 				Password = "This is a test"

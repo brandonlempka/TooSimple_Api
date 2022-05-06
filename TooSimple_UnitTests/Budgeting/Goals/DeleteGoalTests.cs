@@ -16,7 +16,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
         [TestMethod]
         public async Task DeleteGoalSuccess()
         {
-            GoalDataModel goal = new()
+            Goal goal = new()
             {
                 GoalId = "123",
                 GoalName = "Testing",
@@ -50,7 +50,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
         [TestMethod]
         public async Task DeleteGoalValidationErrors()
         {
-            GoalDataModel? goal = null;
+            Goal? goal = null;
 
             Mock<IGoalAccessor> goalAccessorMock = new();
 
@@ -70,7 +70,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
         [TestMethod]
         public async Task DeleteGoalDatabaseFailure()
         {
-            GoalDataModel goal = new()
+            Goal goal = new()
             {
                 GoalId = "123",
                 GoalName = "Testing",

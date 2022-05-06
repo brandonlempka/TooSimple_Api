@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System.Data;
-using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.DataModels;
 using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_DataAccessors.Database.Accounts
@@ -81,7 +81,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
         /// <summary>
         /// Retrieves a user by email address for logging in purposes.
         /// </summary>
-        /// <param name="emailAddress">
+        /// <param name="normalizedEmailAddress">
         /// Email address of user
         /// </param>
         /// <returns>

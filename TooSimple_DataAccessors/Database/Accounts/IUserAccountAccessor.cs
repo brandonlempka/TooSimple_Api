@@ -1,4 +1,4 @@
-﻿using TooSimple_Poco.Models.Database;
+﻿using TooSimple_Poco.Models.DataModels;
 using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_DataAccessors.Database.Accounts

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TooSimple_Managers.Goals;
-using TooSimple_Poco.Models.Budgeting;
-using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.DataModels;
+using TooSimple_Poco.Models.Dtos.Goals;
 using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Api.Controllers
@@ -70,7 +70,7 @@ namespace TooSimple_Api.Controllers
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<BaseHttpResponse> AddNewGoal([FromBody]GoalDataModel goalDataModel)
+        public async Task<BaseHttpResponse> AddNewGoal([FromBody] GoalDataModel goalDataModel)
         {
             BaseHttpResponse response = await _goalManager.AddNewGoalAsync(goalDataModel);
             return response;

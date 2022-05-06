@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System.Data;
 using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.DataModels;
 using TooSimple_Poco.Models.Plaid.AccountUpdate;
 using TooSimple_Poco.Models.Shared;
 

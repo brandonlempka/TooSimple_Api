@@ -1,15 +1,15 @@
 ﻿using System.Security.Claims;
 using System.Security.Cryptography;
-using TooSimple_Poco.Models.Auth;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
 using System.Net;
 using TooSimple_DataAccessors.Database.Accounts;
-using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.Shared;
 using System.Text;
 using System.ComponentModel.DataAnnotations;
+using TooSimple_Poco.Models.Dtos.Auth;
+using TooSimple_Poco.Models.DataModels;
 
 namespace TooSimple_Managers.Authorization
 {
@@ -35,7 +35,7 @@ namespace TooSimple_Managers.Authorization
         /// <returns>
         /// <see cref="JwtDto"/> containg bearer token.
         /// </returns>
-        public async Task<JwtDto> RegisterUserAsync(UserDto userDto)
+        public async Task<JwtDto> RegisterUserAsync(UserRequestDto userDto)
         {
             JwtDto jwtDto = new();
 
@@ -104,7 +104,7 @@ namespace TooSimple_Managers.Authorization
         /// <returns>
         /// <see cref="JwtDto"/> containg bearer token.
         /// </returns>
-        public async Task<JwtDto> LoginUserAsync(UserDto userDto)
+        public async Task<JwtDto> LoginUserAsync(UserRequestDto userDto)
         {
             JwtDto jwtDto = new();
 
@@ -155,7 +155,7 @@ namespace TooSimple_Managers.Authorization
         /// <returns>
         /// BaseHttpResponse of errors.
         /// </returns>
-        private static BaseHttpResponse ValidateUserDto(UserDto userDto)
+        private static BaseHttpResponse ValidateUserDto(UserRequestDto userDto)
         {
             List<string> errors = new();
             BaseHttpResponse response = new()

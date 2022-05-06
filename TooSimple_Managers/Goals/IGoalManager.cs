@@ -1,5 +1,5 @@
-﻿using TooSimple_Poco.Models.Budgeting;
-using TooSimple_Poco.Models.Database;
+﻿using TooSimple_Poco.Models.DataModels;
+using TooSimple_Poco.Models.Dtos.Goals;
 using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Managers.Goals

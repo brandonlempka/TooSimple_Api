@@ -7,8 +7,9 @@ using Moq;
 using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_Managers.Goals;
-using TooSimple_Poco.Models.Budgeting;
-using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.DataModels;
+using TooSimple_Poco.Models.Dtos.Goals;
+using TooSimple_Poco.Models.Entities;
 
 namespace TooSimple_UnitTests.Budgeting.Goals
 {
@@ -18,7 +19,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
         [TestMethod]
         public async Task GetGoalSuccessTest()
         {
-            GoalDataModel goal = new()
+            Goal goal = new()
             {
                 GoalAmount = 123.12M,
                 GoalName = "Testing123",
@@ -77,15 +78,15 @@ namespace TooSimple_UnitTests.Budgeting.Goals
         [TestMethod]
         public async Task GetGoalSuccessNoHistoryTest()
         {
-            GoalDataModel goal = new()
+            Goal goal = new()
             {
                 GoalAmount = 123.12M,
                 GoalName = "Testing123",
                 GoalId = "123"
             };
 
-            IEnumerable<FundingHistoryDataModel> fundingHistory = Enumerable
-                .Empty<FundingHistoryDataModel>();
+            IEnumerable<FundingHistory> fundingHistory = Enumerable
+                .Empty<FundingHistory>();
 
             Mock<IGoalAccessor> goalAccessorMock = new();
             Mock<IAccountAccessor> accountAccessorMock = new();
@@ -119,7 +120,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
         [TestMethod]
         public async Task GetGoalNoContentTest()
         {
-            GoalDataModel? goal = null;
+            Goal? goal = null;
 
             Mock<IGoalAccessor> goalAccessorMock = new();
             Mock<IAccountAccessor> accountAccessorMock = new();

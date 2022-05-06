@@ -1,11 +1,11 @@
-﻿using TooSimple_Poco.Models.Auth;
+﻿using TooSimple_Poco.Models.Dtos.Auth;
 
 namespace TooSimple_Managers.Authorization
 {
     public interface IAuthorizationManager
 	{
-		Task<JwtDto> RegisterUserAsync(UserDto userDto);
-		Task<JwtDto> LoginUserAsync(UserDto userDto);
+		Task<JwtDto> RegisterUserAsync(UserRequestDto userDto);
+		Task<JwtDto> LoginUserAsync(UserRequestDto userDto);
 	}
 }
 

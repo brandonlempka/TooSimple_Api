@@ -5,6 +5,7 @@ using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_Managers.Budgeting;
 using TooSimple_Poco.Enums;
 using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.DataModels;
 using TooSimple_Poco.Models.Plaid.AccountUpdate;
 using TooSimple_Poco.Models.Plaid.Transactions;
 using TooSimple_Poco.Models.Plaid.Webhooks;
@@ -106,7 +107,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
 
                 if (response.Success)
                 {
-                    await _budgetingManager.UpdateBudgetByUserId(plaidAccount.UserAccountId);
+                    //await _budgetingManager.UpdateBudgetByUserId(plaidAccount.UserAccountId);
                 }
 
                 return response;

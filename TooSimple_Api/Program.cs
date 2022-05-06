@@ -7,6 +7,7 @@ using Swashbuckle.AspNetCore.Filters;
 using TooSimple_Api.Filters;
 using TooSimple_Api.Middleware;
 using TooSimple_DataAccessors.Database.Accounts;
+using TooSimple_DataAccessors.Database.FundingSchedules;
 using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_DataAccessors.Database.Logging;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
@@ -68,6 +69,7 @@ builder.Services.AddTransient<IAccountAccessor, AccountAccessor>();
 builder.Services.AddTransient<IGoalAccessor, GoalAccessor>();
 builder.Services.AddTransient<ILoggingAccessor, LoggingAccessor>();
 builder.Services.AddTransient<IUserAccountAccessor, UserAccountAccessor>();
+builder.Services.AddTransient<IFundingScheduleAccessor, FundingScheduleAccessor>();
 
 builder.Services.AddTransient<ITokenExchangeManager, TokenExchangeManager>();
 builder.Services.AddTransient<IAccountUpdateManager, AccountUpdateManager>();

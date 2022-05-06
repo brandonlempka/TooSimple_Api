@@ -1,6 +1,6 @@
 ﻿namespace TooSimple_Poco.Models.Database
 {
-    public class TransactionDataModel
+	public class PlaidTransaction
 	{
 		public string? PlaidTransactionId { get; set; } = string.Empty;
 		public string? AccountOwner { get; set; }

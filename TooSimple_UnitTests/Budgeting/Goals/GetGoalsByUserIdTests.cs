@@ -18,7 +18,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
 		[TestMethod]
 		public async Task GetGoalsSuccessTest()
 		{
-			List<GoalDataModel> goals = new()
+			List<Goal> goals = new()
 			{
 				new()
 				{
@@ -55,7 +55,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
 		[TestMethod]
 		public async Task GetGoalsNoResultsTest()
         {
-			List<GoalDataModel> goals = new();
+			List<Goal> goals = new();
 
 			Mock<IGoalAccessor> goalAccessorMock = new();
 			Mock<IAccountAccessor> accountAccessorMock = new();

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using TooSimple_Managers.Authorization;
-using TooSimple_Poco.Models.Auth;
+using TooSimple_Poco.Models.Dtos.Auth;
 
 namespace TooSimple_Api.Controllers
 {
@@ -18,14 +18,14 @@ namespace TooSimple_Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<JwtDto> Register(UserDto request)
+        public async Task<JwtDto> Register(UserRequestDto request)
         {
             JwtDto response = await _authorizationManager.RegisterUserAsync(request);
             return response;
         }
 
         [HttpPost("login")]
-        public async Task<JwtDto> Login(UserDto request)
+        public async Task<JwtDto> Login(UserRequestDto request)
         {
             JwtDto response = await _authorizationManager.LoginUserAsync(request);
             return response;

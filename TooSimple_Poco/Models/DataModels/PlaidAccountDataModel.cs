@@ -1,6 +1,6 @@
 ﻿using TooSimple_Poco.Enums;
 
-namespace TooSimple_Poco.Models.Database
+namespace TooSimple_Poco.Models.DataModels
 {
     public class PlaidAccountDataModel
     {

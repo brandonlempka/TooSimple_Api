@@ -1,7 +1,9 @@
 ﻿using System.Net;
+using TooSimple_DataAccessors.Database.FundingSchedules;
 using TooSimple_DataAccessors.Database.Goals;
-using TooSimple_Poco.Models.Budgeting;
-using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.DataModels;
+using TooSimple_Poco.Models.Dtos.Goals;
+using TooSimple_Poco.Models.Entities;
 using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Managers.Goals
@@ -9,10 +11,12 @@ namespace TooSimple_Managers.Goals
     public class GoalManager : IGoalManager
     {
         private readonly IGoalAccessor _goalAccessor;
+        private readonly IFundingScheduleAccessor _fundingScheduleAccessor;
 
-        public GoalManager(IGoalAccessor goalAccessor)
+        public GoalManager(IGoalAccessor goalAccessor, IFundingScheduleAccessor fundingScheduleAccessor)
         {
             _goalAccessor = goalAccessor;
+            _fundingScheduleAccessor = fundingScheduleAccessor;
         }
 
         /// <summary>
@@ -26,8 +30,11 @@ namespace TooSimple_Managers.Goals
         /// </returns>
         public async Task<GetGoalsDto> GetGoalsByUserIdAsync(string userId)
         {
-            IEnumerable<GoalDataModel> goals = await _goalAccessor.GetGoalsByUserIdAsync(userId);
-            if (!goals.Any())
+            IEnumerable<Goal> goals = await _goalAccessor.GetGoalsByUserIdAsync(userId);
+            IEnumerable<FundingSchedule> fundingSchedules = await _fundingScheduleAccessor
+                .GetFundingSchedulesByUserIdAsync(userId);
+
+            if (!goals.Any() || !fundingSchedules.Any())
             {
                 GetGoalsDto errorModel = new()
                 {
@@ -38,14 +45,35 @@ namespace TooSimple_Managers.Goals
                 return errorModel;
             }
 
-            GetGoalsDto responseModel = new()
+            IEnumerable<GoalDataModel> dataModels = goals.Select(goal => new GoalDataModel(goal));
+
+            foreach (GoalDataModel goalDataModel in dataModels)
+            {
+                FundingSchedule? fundingSchedule = fundingSchedules.FirstOrDefault(schedule =>
+                    schedule.FundingScheduleId == goalDataModel.FundingScheduleId);
+
+                if (fundingSchedule is null)
+                {
+                    GetGoalsDto errorModel = new()
+                    {
+                        ErrorMessage = "Something went wrong.",
+                        Status = HttpStatusCode.InternalServerError,
+                    };
+
+                    return errorModel;
+                }
+
+                goalDataModel.FundingSchedule = new FundingScheduleDataModel(fundingSchedule);
+            }
+
+            GetGoalsDto getGoalDtos = new()
             {
                 Success = true,
                 Status = HttpStatusCode.OK,
-                Goals = goals
+                Goals = dataModels
             };
 
-            return responseModel;
+            return getGoalDtos;
         }
 
         /// <summary>
@@ -59,7 +87,7 @@ namespace TooSimple_Managers.Goals
         /// </returns>
         public async Task<GetGoalDto> GetGoalByGoalIdAsync(string goalId)
         {
-            GoalDataModel? goal = await _goalAccessor.GetGoalByGoalIdAsync(goalId);
+            Goal? goal = await _goalAccessor.GetGoalByGoalIdAsync(goalId);
             if (goal is null)
             {
                 GetGoalDto errorModel = new()
@@ -71,7 +99,7 @@ namespace TooSimple_Managers.Goals
                 return errorModel;
             }
 
-            IEnumerable<FundingHistoryDataModel> fundingHistory = await _goalAccessor
+            IEnumerable<FundingHistory> fundingHistory = await _goalAccessor
                 .GetFundingHistoryByGoalId(goalId);
 
             if (fundingHistory.Any())
@@ -81,22 +109,34 @@ namespace TooSimple_Managers.Goals
                         fundingHistory.DestinationGoalName))
                     .ToList()
                     .ForEach(fundingHistory =>
-                        fundingHistory.DestinationGoalName = "Ready to Spend");
+                        fundingHistory.DestinationGoalName = "Safe to Spend");
 
                 fundingHistory
                      .Where(fundingHistory => string.IsNullOrWhiteSpace(
                          fundingHistory.SourceGoalName))
                      .ToList()
                      .ForEach(fundingHistory =>
-                         fundingHistory.SourceGoalName = "Ready to Spend");
+                         fundingHistory.SourceGoalName = "Safe to Spend");
             }
+
+            IEnumerable<FundingSchedule>? fundingSchedules = await _fundingScheduleAccessor
+                .GetFundingSchedulesByUserIdAsync(goal.UserAccountId);
+
+            GoalDataModel goalDataModel = new(goal);
+
+            IEnumerable<FundingScheduleDataModel> fundingScheduleDataModels = fundingSchedules
+                .Select(schedule => new FundingScheduleDataModel(schedule));
+
+            IEnumerable<FundingHistoryDataModel> fundingHistoryDataModels = fundingHistory
+                .Select(history => new FundingHistoryDataModel(history));
 
             GetGoalDto responseModel = new()
             {
                 Success = true,
                 Status = HttpStatusCode.OK,
-                Goal = goal,
-                FundingHistory = fundingHistory
+                Goal = goalDataModel,
+                FundingHistory = fundingHistoryDataModels,
+                FundingSchedules = fundingScheduleDataModels
             };
 
             return responseModel;
@@ -128,8 +168,11 @@ namespace TooSimple_Managers.Goals
             }
 
             goalDataModel.CreationDate = DateTime.UtcNow;
-            
-            DatabaseResponseModel responseModel = await _goalAccessor.AddNewGoalAsync(goalDataModel);
+            goalDataModel.GetNextContribution();
+
+            Goal goal = new(goalDataModel);
+
+            DatabaseResponseModel responseModel = await _goalAccessor.AddNewGoalAsync(goal);
             
             if (!responseModel.Success)
             {
@@ -178,8 +221,10 @@ namespace TooSimple_Managers.Goals
 
                 return errorResponse;
             }
+            
+            Goal goal = new(goalDataModel);
 
-            DatabaseResponseModel responseModel = await _goalAccessor.UpdateGoalAsync(goalDataModel);
+            DatabaseResponseModel responseModel = await _goalAccessor.UpdateGoalAsync(goal);
             
             if (!responseModel.Success)
             {
@@ -209,7 +254,7 @@ namespace TooSimple_Managers.Goals
         /// <returns></returns>
         public async Task<BaseHttpResponse> DeleteGoalAsync(string goalId)
         {
-            GoalDataModel? goalDataModel = await _goalAccessor.GetGoalByGoalIdAsync(goalId);
+            Goal? goalDataModel = await _goalAccessor.GetGoalByGoalIdAsync(goalId);
             if (goalDataModel is null)
             {
                 BaseHttpResponse errorResponse = new()

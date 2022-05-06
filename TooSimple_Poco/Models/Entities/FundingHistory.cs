@@ -1,6 +1,6 @@
-﻿namespace TooSimple_Poco.Models.Database
+﻿namespace TooSimple_Poco.Models.Entities
 {
-    public class FundingHistoryDataModel
+	public class FundingHistory
 	{
         public string FundingHistoryId { get; set; } = string.Empty;
         public string SourceGoalId { get; set; } = string.Empty;

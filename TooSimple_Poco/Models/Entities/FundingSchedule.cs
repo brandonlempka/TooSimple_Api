@@ -1,6 +1,6 @@
-﻿namespace TooSimple_Poco.Models.Database
+﻿namespace TooSimple_Poco.Models.Entities
 {
-    public class FundingScheduleDataModel
+	public class FundingSchedule
 	{
         public string FundingScheduleId { get; set; } = string.Empty;
         public string UserAccountId { get; set; } = string.Empty;

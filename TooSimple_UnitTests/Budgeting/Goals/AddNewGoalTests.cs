@@ -17,7 +17,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
         [TestMethod]
         public async Task AddNewGoalSuccess()
         {
-            GoalDataModel goal = new()
+            Goal goal = new()
             {
                 GoalName = "Testing",
                 GoalAmount = 123M,
@@ -32,7 +32,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
             Mock<IGoalAccessor> goalAccessorMock = new();
 
             goalAccessorMock.Setup(
-                x => x.AddNewGoalAsync(It.IsAny<GoalDataModel>()))
+                x => x.AddNewGoalAsync(It.IsAny<Goal>()))
                 .ReturnsAsync(databaseResponseModel);
 
             GoalManager goalManager = new(
@@ -58,7 +58,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
             string userAccountId,
             int numberOfErrors)
         {
-            GoalDataModel goal = new()
+            Goal goal = new()
             {
                 GoalName = goalName,
                 GoalAmount = 123M,
@@ -73,7 +73,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
             Mock<IGoalAccessor> goalAccessorMock = new();
 
             goalAccessorMock.Setup(
-                x => x.AddNewGoalAsync(It.IsAny<GoalDataModel>()))
+                x => x.AddNewGoalAsync(It.IsAny<Goal>()))
                 .ReturnsAsync(databaseResponseModel);
 
             GoalManager goalManager = new(
@@ -95,7 +95,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
         [TestMethod]
         public async Task AddNewGoalDatabaseFailure()
         {
-            GoalDataModel goal = new()
+            Goal goal = new()
             {
                 GoalName = "Testing",
                 GoalAmount = 123M,
@@ -110,7 +110,7 @@ namespace TooSimple_UnitTests.Budgeting.Goals
             Mock<IGoalAccessor> goalAccessorMock = new();
 
             goalAccessorMock.Setup(
-                x => x.AddNewGoalAsync(It.IsAny<GoalDataModel>()))
+                x => x.AddNewGoalAsync(It.IsAny<Goal>()))
                 .ReturnsAsync(databaseResponseModel);
 
             GoalManager goalManager = new(
