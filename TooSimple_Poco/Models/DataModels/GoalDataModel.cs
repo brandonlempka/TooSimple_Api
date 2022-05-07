@@ -79,6 +79,7 @@ namespace TooSimple_Poco.Models.DataModels
             {
                 NextContributionAmount = 0.00M;
                 NextContributionDate = DateTime.MinValue;
+                return;
             }
 
             if (IsExpense)
@@ -102,9 +103,9 @@ namespace TooSimple_Poco.Models.DataModels
                         numberOfContributionsRemaining = numberOfDaysToCompletion / 7;
                         nextContributionDate = FundingSchedule.FirstContributionDate;
 
-                        while (nextContributionDate < now)
+                        while (nextContributionDate <= now)
                         {
-                            nextContributionDate.AddDays(7);
+                            nextContributionDate = nextContributionDate.AddDays(7);
                         }
 
                         break;
@@ -112,49 +113,57 @@ namespace TooSimple_Poco.Models.DataModels
                         numberOfContributionsRemaining = numberOfDaysToCompletion / 14;
                         nextContributionDate = FundingSchedule.FirstContributionDate;
 
-                        while (nextContributionDate < now)
+                        while (nextContributionDate <= now)
                         {
-                            nextContributionDate.AddDays(14);
+                            nextContributionDate = nextContributionDate.AddDays(14);
                         }
 
                         break;
                     case (int)ContributionSchedule.Monthly:
-                        numberOfContributionsRemaining = CalculateNumberOfMonthsBetween(ContributionSchedule.Monthly);
+                        numberOfContributionsRemaining = CalculateNumberOfMonthsBetween(
+                            ContributionSchedule.Monthly,
+                            now);
                         nextContributionDate = FundingSchedule.FirstContributionDate;
 
-                        while (nextContributionDate < now)
+                        while (nextContributionDate <= now)
                         {
-                            nextContributionDate.AddMonths(1);
+                            nextContributionDate = nextContributionDate.AddMonths(1);
                         }
 
                         break;
                     case (int)ContributionSchedule.BiMonthly:
-                        numberOfContributionsRemaining = CalculateNumberOfMonthsBetween(ContributionSchedule.BiMonthly);
-
+                        numberOfContributionsRemaining = CalculateNumberOfMonthsBetween(
+                            ContributionSchedule.BiMonthly,
+                            now);
                         nextContributionDate = FundingSchedule.FirstContributionDate;
 
-                        while (nextContributionDate < now)
+                        while (nextContributionDate <= now)
                         {
-                            nextContributionDate.AddMonths(2);
+                            nextContributionDate = nextContributionDate.AddMonths(2);
                         }
 
                         break;
                     case (int)ContributionSchedule.LastDayOfMonth:
-                        numberOfContributionsRemaining = CalculateNumberOfMonthsBetween(ContributionSchedule.LastDayOfMonth);
-
+                        numberOfContributionsRemaining = CalculateNumberOfMonthsBetween(
+                            ContributionSchedule.LastDayOfMonth,
+                            now);
                         nextContributionDate = FundingSchedule.FirstContributionDate;
 
                         while (nextContributionDate < now)
                         {
-                            nextContributionDate.AddMonths(1);
+                            nextContributionDate = nextContributionDate.AddMonths(1);
+                            nextContributionDate = new DateTime(nextContributionDate.Year, nextContributionDate.Month, 1)
+                                .AddMonths(1)
+                                .AddDays(-1);
                         }
 
                         break;
                 }
 
+                NextContributionDate = nextContributionDate;
+
                 if (IsContributionFixed)
                 {
-                    NextContributionDate = nextContributionDate;
                     return;
                 }
 
@@ -176,18 +185,19 @@ namespace TooSimple_Poco.Models.DataModels
 
         }
 
-        private int CalculateNumberOfMonthsBetween(ContributionSchedule fundingSchedule)
+        private int CalculateNumberOfMonthsBetween(
+            ContributionSchedule fundingSchedule,
+            DateTime currentDate)
         {
             int counter = 0;
             int numberOfMonthsToSkip = fundingSchedule == ContributionSchedule.BiMonthly
                 ? 2
                 : 1;
 
-            DateTime counterDate = DateTime.UtcNow;
-            while (counterDate < DesiredCompletionDate)
+            while (currentDate < DesiredCompletionDate)
             {
                 counter++;
-                counterDate.AddMonths(numberOfMonthsToSkip);
+                currentDate = currentDate.AddMonths(numberOfMonthsToSkip);
             }
 
             return counter;
