@@ -75,7 +75,9 @@ namespace TooSimple_Managers.Plaid.TokenExchange
                 {
                     Status = HttpStatusCode.InternalServerError,
                     ErrorMessage = response.ErrorMessage
-                }
+                };
+
+
         }
     }
 }
