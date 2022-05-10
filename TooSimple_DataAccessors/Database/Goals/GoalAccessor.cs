@@ -199,7 +199,6 @@ namespace TooSimple_DataAccessors.Database.Goals
 
                 transaction.Commit();
                 return DatabaseResponseModel.CreateSuccess();
-
             }
             catch (Exception ex)
             {

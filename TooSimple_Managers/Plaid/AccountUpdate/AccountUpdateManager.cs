@@ -4,9 +4,7 @@ using TooSimple_DataAccessors.Database.Logging;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_Managers.Budgeting;
 using TooSimple_Poco.Enums;
-using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.DataModels;
-using TooSimple_Poco.Models.Plaid.AccountUpdate;
 using TooSimple_Poco.Models.Plaid.Transactions;
 using TooSimple_Poco.Models.Plaid.Webhooks;
 using TooSimple_Poco.Models.Shared;
@@ -39,7 +37,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
         /// <see cref="DatabaseResponseModel"/>
         /// Database response indicating success or failure.
         /// </returns>
-        public async Task<DatabaseResponseModel> UpdateAccountBalancesByUserIdAsync(string userId)
+        public async Task<DatabaseResponseModel> PlaidSyncByUserIdAsync(string userId)
         {
             IEnumerable<IGrouping<string, PlaidAccountDataModel>>? accountGroups = await GetAccountTokenGroups(userId);
 
@@ -54,7 +52,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                     .Select(account => account.PlaidAccountId)
                     .ToArray();
 
-                DatabaseResponseModel response = await PlaidBalanceUpdate(accessToken, accountIds);
+                DatabaseResponseModel response = await PlaidSync(accessToken, accountIds);
                 return response;
             }
 
@@ -69,7 +67,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
         /// <see cref="DatabaseResponseModel"/>
         /// Database response indicating success or failure.
         /// </returns>
-        public async Task<DatabaseResponseModel> UpdateAccountBalancesByItemIdAsync(JsonElement json)
+        public async Task<DatabaseResponseModel> PlaidSyncByItemIdAsync(JsonElement json)
         {
             PlaidWebhookResponseDto? webhookResponse = JsonSerializer.Deserialize<PlaidWebhookResponseDto>(json);
 
@@ -103,7 +101,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                     plaidAccount.PlaidAccountId
                 };
 
-                DatabaseResponseModel response = await PlaidBalanceUpdate(plaidAccount.AccessToken, accountId);
+                DatabaseResponseModel response = await PlaidSync(plaidAccount.AccessToken, accountId);
 
                 if (response.Success)
                 {
@@ -141,7 +139,14 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                     .Select(account => account.PlaidAccountId)
                     .ToArray();
 
-                DatabaseResponseModel response = await PlaidBalanceUpdate(accessToken, accountIds);
+                DatabaseResponseModel response = await PlaidSync(accessToken, accountIds);
+                if (!response.Success)
+                    return response;
+
+                DatabaseResponseModel transactionDatabaseResponse = await SaveNewPlaidTransactions(
+                    accessToken,
+                    accountIds,
+                    userId);
             }
 
             return DatabaseResponseModel.CreateSuccess();
@@ -159,14 +164,14 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
             return accountGroups;
         }
 
-        private async Task<DatabaseResponseModel> PlaidBalanceUpdate(string accessToken, string[] accountIds)
+        private async Task<DatabaseResponseModel> PlaidSync(string accessToken, string[] accountIds)
         {
-            AccountUpdateRequestModel requestModel = new(
+            TransactionUpdateRequestModel requestModel = new(
                 accessToken,
                 accountIds);
 
-            AccountUpdateResponseModel plaidUpdateResponse = await _plaidAccountAccessor
-                .UpdateAccountBalancesAsync(requestModel);
+            TransactionUpdateResponseModel plaidUpdateResponse = await _plaidAccountAccessor
+                .GetPlaidTransactionsAsync(requestModel);
 
             if (plaidUpdateResponse is null)
                 return DatabaseResponseModel.CreateError("Something went wrong while contacting plaid.");
@@ -177,8 +182,9 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                 return lockResponse;
             }
 
-            DatabaseResponseModel response = await _accountAccessor.UpdateAccountBalancesAsync(plaidUpdateResponse);
-            return response;
+            //DatabaseResponseModel response = await _accountAccessor.UpdateAccountBalancesAsync(plaidUpdateResponse);
+            //return response;
+            return new();
         }
 
         private async Task<DatabaseResponseModel> SaveNewPlaidTransactions(

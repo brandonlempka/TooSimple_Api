@@ -6,7 +6,5 @@ namespace TooSimple_Poco.Models.Dtos.Goals
     public class GetGoalsDto : BaseHttpResponse
 	{
 		public IEnumerable<GoalDataModel>? Goals { get; set; }
-		public IEnumerable<FundingScheduleDataModel>? FundingSchedules { get; set; }
 	}
 }
-

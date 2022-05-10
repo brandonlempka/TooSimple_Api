@@ -9,17 +9,19 @@
   <ItemGroup>
     <None Remove="Models\Budgeting\" />
     <None Remove="Models\Plaid\Transactions\" />
-    <None Remove="ApiResponsModels\" />
     <None Remove="Models\Entities\" />
     <None Remove="Models\Dtos\Auth\" />
     <None Remove="Models\Dtos\Goals\" />
+    <None Remove="Models\Dtos\Transactions\" />
+    <None Remove="Models\ApiRequestModels\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Dtos\" />
     <Folder Include="Models\Plaid\Transactions\" />
-    <Folder Include="ApiResponsModels\" />
     <Folder Include="Models\Entities\" />
     <Folder Include="Models\Dtos\Auth\" />
     <Folder Include="Models\Dtos\Goals\" />
+    <Folder Include="Models\Dtos\Transactions\" />
+    <Folder Include="Models\ApiRequestModels\" />
   </ItemGroup>
 </Project>
