@@ -27,9 +27,6 @@ namespace TooSimple_DataAccessors.Database.Accounts
         /// </returns>
         public async Task<IEnumerable<PlaidAccountDataModel>> GetPlaidAccountsByUserIdAsync(string userId)
         {
-            if (string.IsNullOrWhiteSpace(userId))
-                userId = "1d4c76c2-148b-47b5-9a53-c29f3a233c80";
-
             IEnumerable<PlaidAccountDataModel> plaidAccounts;
             using (MySqlConnection connection = new(_connectionString))
             {

@@ -30,7 +30,7 @@ namespace TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels
             CountryCodes = PlaidSettings.Countries;
             Language = PlaidSettings.Language;
             Products = PlaidSettings.Products;
-            WebHookCallbackUrl = "http://brandonlempka.com/api/Plaid/webhookHandler";
+            WebHookCallbackUrl = "https://api.brandonlempka.com/api/Plaid/webhookHandler";
             User = new()
             {
                 ClientUserId = userId

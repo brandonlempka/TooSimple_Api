@@ -10,6 +10,7 @@ using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Database.FundingSchedules;
 using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_DataAccessors.Database.Logging;
+using TooSimple_DataAccessors.Database.PlaidAccounts;
 using TooSimple_DataAccessors.Database.Transactions;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_DataAccessors.Plaid.TokenExchange;
@@ -73,6 +74,7 @@ builder.Services.AddTransient<ILoggingAccessor, LoggingAccessor>();
 builder.Services.AddTransient<IUserAccountAccessor, UserAccountAccessor>();
 builder.Services.AddTransient<IFundingScheduleAccessor, FundingScheduleAccessor>();
 builder.Services.AddTransient<ITransactionsAccessor, TransactionsAccessor>();
+builder.Services.AddTransient<IPlaidAccountAccessor, PlaidAccountAccessor>();
 
 builder.Services.AddTransient<ITokenExchangeManager, TokenExchangeManager>();
 builder.Services.AddTransient<IAccountUpdateManager, AccountUpdateManager>();
