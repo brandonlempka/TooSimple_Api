@@ -5,7 +5,6 @@ using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_Managers.Budgeting;
 using TooSimple_Poco.Enums;
 using TooSimple_Poco.Models.DataModels;
-using TooSimple_Poco.Models.Plaid.AccountUpdate;
 using TooSimple_Poco.Models.Plaid.Transactions;
 using TooSimple_Poco.Models.Plaid.Webhooks;
 using TooSimple_Poco.Models.Shared;

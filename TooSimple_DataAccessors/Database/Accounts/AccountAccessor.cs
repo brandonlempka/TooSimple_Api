@@ -95,7 +95,6 @@ namespace TooSimple_DataAccessors.Database.Accounts
             return plaidAccount;
         }
 
-        public async Task<DatabaseResponseModel> InsertNewAccountAsync()
         /// <summary>
         /// Updates TooSimple database with latest plaid account balances.
         /// </summary>

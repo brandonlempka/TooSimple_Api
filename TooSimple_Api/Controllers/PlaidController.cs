@@ -54,12 +54,15 @@ namespace TooSimple_Api.Controllers
         /// or failure.
         /// </returns>
         [HttpPost("publicTokenExchange/{userId}")]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<BaseHttpResponse> PlaidLinkTokenExchange(
             string userId,
             [FromBody] TokenExchangeDataModel dataModel)
         {
-            var test2 = dataModel;
-            return new();
+            BaseHttpResponse response = await _tokenExchangeManager.PublicTokenExchangeAsync(userId, dataModel);
+            return response;
         }
 
         /// <summary>
