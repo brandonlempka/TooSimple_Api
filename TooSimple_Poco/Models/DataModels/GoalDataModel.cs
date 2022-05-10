@@ -82,14 +82,17 @@ namespace TooSimple_Poco.Models.DataModels
                 return;
             }
 
-            if (IsExpense)
-                CalculateExpenseContributions();
 
             DateTime now = currentDate ?? DateTime.UtcNow.Date;
+            DateTime nextDueDate = DesiredCompletionDate;
 
-            if (now < DesiredCompletionDate.Date)
+            if (IsExpense)
+                nextDueDate = GetNextExpenseContributionDate(now);
+            
+
+            if (now < nextDueDate)
             {
-                int numberOfDaysToCompletion = (DesiredCompletionDate - now).Days;
+                int numberOfDaysToCompletion = (nextDueDate - now).Days;
                 int numberOfContributionsRemaining;
                 DateTime nextContributionDate;
 
@@ -120,7 +123,7 @@ namespace TooSimple_Poco.Models.DataModels
 
                         break;
                     case (int)ContributionSchedule.Monthly:
-                        numberOfContributionsRemaining = CalculateNumberOfMonthsBetween(
+                        numberOfContributionsRemaining = GetNumberOfMonthsRemaining(
                             ContributionSchedule.Monthly,
                             now);
                         nextContributionDate = FundingSchedule.FirstContributionDate;
@@ -132,7 +135,7 @@ namespace TooSimple_Poco.Models.DataModels
 
                         break;
                     case (int)ContributionSchedule.BiMonthly:
-                        numberOfContributionsRemaining = CalculateNumberOfMonthsBetween(
+                        numberOfContributionsRemaining = GetNumberOfMonthsRemaining(
                             ContributionSchedule.BiMonthly,
                             now);
                         nextContributionDate = FundingSchedule.FirstContributionDate;
@@ -144,7 +147,7 @@ namespace TooSimple_Poco.Models.DataModels
 
                         break;
                     case (int)ContributionSchedule.LastDayOfMonth:
-                        numberOfContributionsRemaining = CalculateNumberOfMonthsBetween(
+                        numberOfContributionsRemaining = GetNumberOfMonthsRemaining(
                             ContributionSchedule.LastDayOfMonth,
                             now);
                         nextContributionDate = FundingSchedule.FirstContributionDate;
@@ -180,12 +183,60 @@ namespace TooSimple_Poco.Models.DataModels
             }
         }
 
-        private void CalculateExpenseContributions()
+        /// <summary>
+        /// Figures out the next due date for recurring expenses.
+        /// </summary>
+        /// <param name="now">
+        /// The now parameter for unit testing.
+        /// </param>
+        /// <returns>
+        /// DateTime of next expense contribution.
+        /// </returns>
+        private DateTime GetNextExpenseContributionDate(DateTime now)
         {
+            DateTime nextContributionDate = DesiredCompletionDate;
 
+            while (nextContributionDate > now)
+            {
+                switch (RecurrenceTimeFrame)
+                {
+                    case (int)ExpenseFrequency.Weekly:
+                        nextContributionDate = nextContributionDate.AddDays(7);
+                        break;
+                    case (int)ExpenseFrequency.BiWeekly:
+                        nextContributionDate = nextContributionDate.AddDays(14);
+                        break;
+                    case (int)ExpenseFrequency.Monthly:
+                        nextContributionDate = nextContributionDate.AddMonths(1);
+                        break;
+                    case (int)ExpenseFrequency.BiMonthly:
+                        nextContributionDate = nextContributionDate.AddMonths(2);
+                        break;
+                    case (int)ExpenseFrequency.SixMonths:
+                        nextContributionDate = nextContributionDate.AddMonths(6);
+                        break;
+                    case (int)ExpenseFrequency.Yearly:
+                        nextContributionDate = nextContributionDate.AddYears(1);
+                        break;
+                }
+            }
+
+            return nextContributionDate;
         }
 
-        private int CalculateNumberOfMonthsBetween(
+        /// <summary>
+        /// Gets the number of months remaining between now and the completion date.
+        /// </summary>
+        /// <param name="fundingSchedule">
+        /// Funding schedule to determine how many months to skip.
+        /// </param>
+        /// <param name="currentDate">
+        /// Current date used for unit testing.
+        /// </param>
+        /// <returns>
+        /// Int of number of months remaining.
+        /// </returns>
+        private int GetNumberOfMonthsRemaining(
             ContributionSchedule fundingSchedule,
             DateTime currentDate)
         {

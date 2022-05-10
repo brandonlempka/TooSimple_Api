@@ -10,6 +10,7 @@ using TooSimple_DataAccessors.Database.Accounts;
 using TooSimple_DataAccessors.Database.FundingSchedules;
 using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_DataAccessors.Database.Logging;
+using TooSimple_DataAccessors.Database.Transactions;
 using TooSimple_DataAccessors.Plaid.AccountUpdate;
 using TooSimple_DataAccessors.Plaid.TokenExchange;
 using TooSimple_Managers.Authorization;
@@ -17,6 +18,7 @@ using TooSimple_Managers.Budgeting;
 using TooSimple_Managers.Goals;
 using TooSimple_Managers.Plaid.AccountUpdate;
 using TooSimple_Managers.Plaid.TokenExchange;
+using TooSimple_Managers.Transactions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,12 +72,14 @@ builder.Services.AddTransient<IGoalAccessor, GoalAccessor>();
 builder.Services.AddTransient<ILoggingAccessor, LoggingAccessor>();
 builder.Services.AddTransient<IUserAccountAccessor, UserAccountAccessor>();
 builder.Services.AddTransient<IFundingScheduleAccessor, FundingScheduleAccessor>();
+builder.Services.AddTransient<ITransactionsAccessor, TransactionsAccessor>();
 
 builder.Services.AddTransient<ITokenExchangeManager, TokenExchangeManager>();
 builder.Services.AddTransient<IAccountUpdateManager, AccountUpdateManager>();
 builder.Services.AddTransient<IBudgetingManager, BudgetingManager>();
 builder.Services.AddTransient<IGoalManager, GoalManager>();
 builder.Services.AddTransient<IAuthorizationManager, AuthorizationManager>();
+builder.Services.AddTransient<ITransactionManager, TransactionManager>();
 
 var app = builder.Build();
 app.UseCors("ApiCorsPolicy");

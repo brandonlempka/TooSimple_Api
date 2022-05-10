@@ -19,9 +19,11 @@
   <ItemGroup>
     <None Remove="Database\Goals\" />
     <None Remove="Database\FundingSchedules\" />
+    <None Remove="Database\Transactions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Database\Goals\" />
     <Folder Include="Database\FundingSchedules\" />
+    <Folder Include="Database\Transactions\" />
   </ItemGroup>
 </Project>
