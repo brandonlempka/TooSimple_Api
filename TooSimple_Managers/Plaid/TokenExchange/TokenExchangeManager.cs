@@ -1,6 +1,8 @@
 ﻿using TooSimple_DataAccessors.Plaid.TokenExchange;
 using TooSimple_Poco.Models.Plaid.TokenExchange.PlaidLinkTokenModels;
 using System.Net;
+using TooSimple_Poco.Models.Shared;
+using TooSimple_Poco.Models.Plaid.TokenExchange;
 
 namespace TooSimple_Managers.Plaid.TokenExchange
 {
@@ -52,6 +54,28 @@ namespace TooSimple_Managers.Plaid.TokenExchange
             };
 
             return responseDto;
+        }
+
+        public async Task<BaseHttpResponse> PublicTokenExchangeAsync(
+            string userId,
+            TokenExchangeDataModel dataModel)
+        {
+            if (string.IsNullOrWhiteSpace(dataModel.PublicToken))
+                return new BaseHttpResponse
+                {
+                    Status = HttpStatusCode.BadRequest,
+                    ErrorMessage = "Public token was not formed correctly."
+                };
+            
+            TokenExchangeRequestModel requestModel = new(dataModel.PublicToken);
+            TokenExchangeResponseModel response = await _tokenExchangeAccessor.PublicTokenExchangeAsync(requestModel);
+
+            if (!string.IsNullOrWhiteSpace(response.ErrorMessage))
+                return new BaseHttpResponse
+                {
+                    Status = HttpStatusCode.InternalServerError,
+                    ErrorMessage = response.ErrorMessage
+                }
         }
     }
 }
