@@ -87,7 +87,7 @@ namespace TooSimple_DataAccessors.Database.Accounts
         /// <returns>
         /// <see cref="UserAccountDataModel"/> of user data.
         /// </returns>
-        public async Task<UserAccountDataModel> GetUserAccountAsync(string normalizedEmailAddress)
+        public async Task<UserAccountDataModel?> GetUserAccountAsync(string normalizedEmailAddress)
         {
             UserAccountDataModel dataModel;
             using (MySqlConnection connection = new(_connectionString))

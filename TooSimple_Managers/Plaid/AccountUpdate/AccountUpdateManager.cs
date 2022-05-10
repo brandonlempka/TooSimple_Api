@@ -80,14 +80,14 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
             // todo
             // I'm not sure what else I'm likely to get, but probably need to handle this if
             // a lot of these come through 
-            if (webhookResponse.WebhookType != PlaidWebhookType.TRANSACTIONS.ToString()
-                || webhookResponse.WebhookCode != PlaidWebhookCode.DEFAULT_UPDATE.ToString())
-            {
-                bool response = await _loggingAccessor.LogMessageAsync(json.ToString());
-                return response
-                    ? DatabaseResponseModel.CreateSuccess()
-                    : DatabaseResponseModel.CreateError("Failure while logging response.");
-            }
+            //if (webhookResponse.WebhookType != PlaidWebhookType.TRANSACTIONS.ToString()
+            //    || webhookResponse.WebhookCode != PlaidWebhookCode.DEFAULT_UPDATE.ToString())
+            //{
+            _ = await _loggingAccessor.LogMessageAsync(json.ToString());
+                //return response
+                //    ? DatabaseResponseModel.CreateSuccess()
+                //    : DatabaseResponseModel.CreateError("Failure while logging response.");
+            //}
 
             if (webhookResponse.WebhookCode == PlaidWebhookCode.DEFAULT_UPDATE.ToString()
                 && !string.IsNullOrWhiteSpace(webhookResponse.ItemId))
