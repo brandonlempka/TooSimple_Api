@@ -19,6 +19,7 @@ using TooSimple_Managers.Budgeting;
 using TooSimple_Managers.Goals;
 using TooSimple_Managers.Plaid.AccountUpdate;
 using TooSimple_Managers.Plaid.TokenExchange;
+using TooSimple_Managers.PlaidAccounts;
 using TooSimple_Managers.Transactions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -82,6 +83,7 @@ builder.Services.AddTransient<IBudgetingManager, BudgetingManager>();
 builder.Services.AddTransient<IGoalManager, GoalManager>();
 builder.Services.AddTransient<IAuthorizationManager, AuthorizationManager>();
 builder.Services.AddTransient<ITransactionManager, TransactionManager>();
+builder.Services.AddTransient<IPlaidAccountManager, PlaidAccountManager>();
 
 var app = builder.Build();
 app.UseCors("ApiCorsPolicy");

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using TooSimple_Managers.Plaid.AccountUpdate;
 using TooSimple_Managers.Plaid.TokenExchange;
@@ -31,7 +32,10 @@ namespace TooSimple_Api.Controllers
         /// </summary>
         /// <param name="userId">User's Too Simple ID.</param>
         /// <returns>Dto with link token.</returns>
+        [Authorize]
         [HttpGet("createLinkToken/{userId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(500)]
         public async Task<CreateLinkTokenDto> CreateLinkToken(string userId)
         {
             CreateLinkTokenDto tokenDto = await _tokenExchangeManager.GetCreateLinkTokenAsync(userId);
@@ -53,6 +57,7 @@ namespace TooSimple_Api.Controllers
         /// <see cref="BaseHttpResponse"/> base response indicating success
         /// or failure.
         /// </returns>
+        [Authorize]
         [HttpPost("publicTokenExchange/{userId}")]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
@@ -76,6 +81,7 @@ namespace TooSimple_Api.Controllers
         /// until it gets a success.
         /// </returns>
         [HttpPost("webhookHandler")]
+        [ProducesResponseType(200)]
         public async Task<ActionResult> WebhookHandler([FromBody] JsonElement json)
         {
             _ = await _accountUpdateManager.PlaidSyncByItemIdAsync(json);
