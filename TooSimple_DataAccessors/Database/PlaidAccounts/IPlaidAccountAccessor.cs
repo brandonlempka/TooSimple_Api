@@ -8,5 +8,6 @@ namespace TooSimple_DataAccessors.Database.PlaidAccounts
 		Task<IEnumerable<PlaidAccount>> GetPlaidAccountsByUserIdAsync(string userId);
 		Task<PlaidAccount> GetPlaidAccountsByItemIdAsync(string itemId);
 		Task<DatabaseResponseModel> InsertNewAccountAsync(PlaidAccount plaidAccount);
+		Task<DatabaseResponseModel> DeleteAccountAsync(string accountId);
 	}
 }

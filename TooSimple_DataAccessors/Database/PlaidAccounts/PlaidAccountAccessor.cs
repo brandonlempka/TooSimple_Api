@@ -179,5 +179,47 @@ namespace TooSimple_DataAccessors.Database.PlaidAccounts
                 return DatabaseResponseModel.CreateError(ex);
             }
         }
+
+        public async Task<DatabaseResponseModel> DeleteAccountAsync(string accountId)
+        {
+            using MySqlConnection connection = new(_connectionString);
+            await connection.OpenAsync();
+            using IDbTransaction transaction = connection.BeginTransaction();
+
+            try
+            {
+                string deleteTransactionsSql = @"DELETE 
+                                            FROM PlaidTransactions 
+                                            WHERE PlaidAccountId = @accountId";
+
+                string deleteAccountSql = @"DELETE 
+                                            FROM PlaidAccounts 
+                                            WHERE PlaidAccountId = @accountId";
+
+                await connection.ExecuteAsync(
+                    deleteTransactionsSql,
+                    new
+                    {
+                        accountId
+                    },
+                    transaction);
+
+                await connection.ExecuteAsync(
+                    deleteAccountSql,
+                    new
+                    {
+                        accountId
+                    },
+                    transaction);
+
+                transaction.Commit();
+                return DatabaseResponseModel.CreateSuccess();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return DatabaseResponseModel.CreateError(ex);
+            }
+        }
     }
 }
