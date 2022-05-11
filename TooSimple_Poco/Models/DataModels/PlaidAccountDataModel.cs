@@ -1,11 +1,11 @@
-﻿using TooSimple_Poco.Enums;
+﻿using TooSimple_Poco.Models.Entities;
 
 namespace TooSimple_Poco.Models.DataModels
 {
     public class PlaidAccountDataModel
     {
         public string PlaidAccountId { get; set; } = string.Empty;
-        public PlaidAccountType PlaidAccountTypeId { get; set; } = 0;
+        public int PlaidAccountTypeId { get; set; } = 0;
         public string UserAccountId { get; set; } = string.Empty;
         public string Mask { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
@@ -19,6 +19,35 @@ namespace TooSimple_Poco.Models.DataModels
         public bool IsActiveForBudgetingFeatures { get; set; }
         public bool IsPlaidRelogRequired { get; set; }
         public string ItemId { get; set; } = string.Empty;
-        //public ICollection<Transaction> Transactions { get; set; }
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public PlaidAccountDataModel() { }
+
+        /// <summary>
+        /// Converts from <see cref="PlaidAccount"/>
+        /// to <see cref="PlaidAccountDataModel"/>
+        /// </summary>
+        /// <param name="plaidAccount"> <see cref="PlaidAccount"/>
+        /// </param>
+        public PlaidAccountDataModel(PlaidAccount plaidAccount)
+        {
+            PlaidAccountId = plaidAccount.PlaidAccountId;
+            PlaidAccountTypeId = plaidAccount.PlaidAccountTypeId;
+            UserAccountId = plaidAccount.UserAccountId;
+            Mask = plaidAccount.Mask;
+            Name = plaidAccount.Name;
+            NickName = plaidAccount.NickName;
+            CurrentBalance = plaidAccount.CurrentBalance;
+            AvailableBalance = plaidAccount.AvailableBalance;
+            CreditLimit = plaidAccount.CreditLimit;
+            CurrencyCode = plaidAccount.CurrencyCode;
+            AccessToken = plaidAccount.AccessToken;
+            LastUpdated = plaidAccount.LastUpdated;
+            IsActiveForBudgetingFeatures = plaidAccount.IsActiveForBudgetingFeatures;
+            IsPlaidRelogRequired = plaidAccount.IsPlaidRelogRequired;
+            ItemId = plaidAccount.ItemId;
+        }
     }
 }

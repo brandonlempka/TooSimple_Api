@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TooSimple_Poco.Models.Database;
 
@@ -10,7 +9,7 @@ namespace TooSimple_UnitTests.Transactions
 	public class GetTransactionsByUserIdsTest
 	{
 		[TestMethod]
-		public async Task SuccessTest()
+		public void SuccessTest()
         {
 			List<PlaidTransaction> transactions = new()
 			{

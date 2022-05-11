@@ -25,13 +25,13 @@ namespace TooSimple_Managers.Budgeting
 
             decimal accountTotal = accounts
                 .Where(account => account.IsActiveForBudgetingFeatures
-                    && account.PlaidAccountTypeId != PlaidAccountType.CreditCard)
+                    && account.PlaidAccountTypeId != (int)PlaidAccountType.CreditCard)
                 .Select(account => account.AvailableBalance)
                 .Sum() ?? 0;
 
             decimal creditTotal = accounts
                 .Where(account => account.IsActiveForBudgetingFeatures
-                    && account.PlaidAccountTypeId == PlaidAccountType.CreditCard)
+                    && account.PlaidAccountTypeId == (int)PlaidAccountType.CreditCard)
                 .Select(account => account.CurrentBalance)
                 .Sum() ?? 0;
 
