@@ -21,6 +21,7 @@
     <None Remove="Moq" />
     <None Remove="Auth\" />
     <None Remove="Transactions\" />
+    <None Remove="PlaidSyncTests\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TooSimple_DataAccessors\TooSimple_DataAccessors.csproj" />
@@ -29,5 +30,6 @@
   <ItemGroup>
     <Folder Include="Auth\" />
     <Folder Include="Transactions\" />
+    <Folder Include="AccountUpdate\" />
   </ItemGroup>
 </Project>

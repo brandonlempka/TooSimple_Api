@@ -18,19 +18,25 @@ namespace TooSimple_DataAccessors.Database.Transactions
         public async Task<IEnumerable<PlaidTransaction>> GetPlaidTransactionsByUserIdAsync(GetTransactionsRequestModel requestModel)
         {
             List<string> whereClauseList = new();
-            IEnumerable<PlaidTransaction> transactions = Enumerable.Empty<PlaidTransaction>();
 
             if (!string.IsNullOrWhiteSpace(requestModel.AccountIdFilter))
                 whereClauseList.Add("PlaidAccountId = @accountId");
 
             if (!string.IsNullOrWhiteSpace(requestModel.SearchTerm))
-                whereClauseList.Add("(MerchantName LIKE @searchTerm OR Name LIKE @searchTerm)");
+                whereClauseList.Add("(UPPER(MerchantName) LIKE @searchTerm OR UPPER(Name) LIKE @searchTerm)");
 
             if (requestModel.StartDate.HasValue)
                 whereClauseList.Add("TransactionDate >= @startDate");
 
             if (requestModel.EndDate.HasValue)
                 whereClauseList.Add("TransactionDate <= @endDate");
+
+            if (!string.IsNullOrWhiteSpace(requestModel.PrimaryCategoryFilter))
+                whereClauseList.Add("PrimaryCategory = @primaryCategory");
+
+            if (!string.IsNullOrWhiteSpace(requestModel.DetailedCategoryFilter))
+                whereClauseList.Add("DetailedCategory = @detailedCategory");
+
 
             string whereClause = string.Join(" AND ", whereClauseList);
 
@@ -74,20 +80,22 @@ namespace TooSimple_DataAccessors.Database.Transactions
                                 , PlaidAccountId
                                 , UserAccountId
                             FROM PlaidTransactions
-                            WHERE UserId = @userId";
+                            WHERE UserAccountId = @userId";
 
             if (whereClauseList.Any())
             {
                 query += $" and {whereClause}";
             }
 
-            transactions = await connection.QueryAsync<PlaidTransaction>(
+            IEnumerable<PlaidTransaction> transactions = await connection.QueryAsync<PlaidTransaction>(
                 query
                 , new
                 {
                     userId = requestModel.UserId,
                     accountId = requestModel.AccountIdFilter,
-                    searchTerm = requestModel.SearchTerm,
+                    searchTerm = !string.IsNullOrWhiteSpace(requestModel.SearchTerm)
+                        ? $"%{requestModel.SearchTerm.ToUpper()}%"
+                        : null,
                     startDate = requestModel.StartDate,
                     endDate = requestModel.EndDate
                 });

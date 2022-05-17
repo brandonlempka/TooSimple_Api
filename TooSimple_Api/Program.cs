@@ -68,8 +68,7 @@ builder.Services.AddAuthentication(
 string dbConnectionString = builder.Configuration.GetConnectionString("TooSimpleMySql");
 
 builder.Services.AddTransient<ITokenExchangeAccessor, TokenExchangeAccessor>();
-builder.Services.AddTransient<IPlaidAccountUpdateAccessor, PlaidAccountUpdateAccessor>();
-builder.Services.AddTransient<IAccountAccessor, AccountAccessor>();
+builder.Services.AddTransient<IPlaidSyncAccessor, PlaidSyncAccessor>();
 builder.Services.AddTransient<IGoalAccessor, GoalAccessor>();
 builder.Services.AddTransient<ILoggingAccessor, LoggingAccessor>();
 builder.Services.AddTransient<IUserAccountAccessor, UserAccountAccessor>();

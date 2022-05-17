@@ -9,6 +9,11 @@ namespace TooSimple_Poco.Models.Plaid.Transactions
 
 		[JsonPropertyName("account_ids")]
 		public string[]? AccountIds { get; set; }
+
+		[JsonPropertyName("count")]
+		public int Count { get; set; } = 50;
+
+		[JsonPropertyName("offset")]
+		public int Offset { get; set; } = 0;
 	}
 }
-

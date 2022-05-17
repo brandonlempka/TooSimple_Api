@@ -5,7 +5,7 @@ using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Poco.Models.Plaid.Transactions
 {
-	public class TransactionUpdateResponseModel : PlaidApiResponse
+	public class PlaidGetTransactionsResponseModel : PlaidApiResponse
 	{
 		[JsonPropertyName("accounts")]
 		public IEnumerable<AccountResponseModel>? Accounts { get; set; }
