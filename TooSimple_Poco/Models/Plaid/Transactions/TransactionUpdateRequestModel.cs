@@ -1,13 +1,17 @@
-﻿using TooSimple_Poco.Models.Plaid.Shared;
+﻿using System.Text.Json.Serialization;
+using TooSimple_Poco.Models.Plaid.Shared;
 
 namespace TooSimple_Poco.Models.Plaid.Transactions
 {
     public class TransactionUpdateRequestModel  : PlaidRequestModel
 	{
-        public string StartDate { get; set; } = DateTime.UtcNow.AddDays(-30).ToString();
-        public string EndDate { get; set; } = DateTime.UtcNow.ToString();
-        public int Count { get; set; } = 50;
-        public int Offset { get; set; } = 0;
+        [JsonPropertyName("start_date")]
+        public string StartDate { get; set; } = DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-dd");
+
+        [JsonPropertyName("end_date")]
+        public string EndDate { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+        [JsonPropertyName("options")]
         public TransactionsOptionsDataModel Options { get; set; }
 
         /// <summary>
@@ -48,11 +52,11 @@ namespace TooSimple_Poco.Models.Plaid.Transactions
             int? count) : base()
         {
             AccessToken = accessToken;
-            Count = count ?? 50;
             Options = new()
             {
                 AccountIds = accountIds,
-                IncludePersonalFinanceCategory = true
+                IncludePersonalFinanceCategory = true,
+                Count = count ?? 50
             };
         }
     }

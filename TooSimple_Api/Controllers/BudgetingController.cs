@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TooSimple_Managers.Budgeting;
 using TooSimple_Managers.Plaid.AccountUpdate;
+using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Api.Controllers
 {
+	[Authorize]
 	[ApiController]
 	[Route("api/[controller]")]
-    public class BudgetingController : ControllerBase
+	public class BudgetingController : ControllerBase
 	{
 		private readonly IBudgetingManager _budgetingManager;
 		private readonly IAccountUpdateManager _accountUpdateManager;
@@ -21,15 +24,19 @@ namespace TooSimple_Api.Controllers
 
 		[HttpGet("getReadyToSpend")]
 		public async Task<ActionResult<decimal>> GetReadyToSpend(string userId)
-        {
-            decimal readyToSpend = await _budgetingManager.GetUserReadyToSpendAsync(userId);
+		{
+			decimal readyToSpend = await _budgetingManager.GetUserReadyToSpendAsync(userId);
 			return Ok(readyToSpend);
-        }
+		}
 
-		//[HttpGet("updateTransactions")]
-		//public async Task UpdateTransactions(string userId = "1d4c76c2-148b-47b5-9a53-c29f3a233c80")
-  //      {
-		//	await _accountUpdateManager.GetNewTransactionsAsync(userId);
-  //      }
+		[HttpGet("userId/{userId}")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(404)]
+		[ProducesResponseType(500)]
+		public async Task<ActionResult<BaseHttpResponse>> ForcePlaidSync(string userId)
+        {
+			BaseHttpResponse response = await _accountUpdateManager.PlaidSyncByUserIdAsync(userId);
+			return response;
+        }
  	}
 }

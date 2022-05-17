@@ -5,7 +5,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
 {
     public interface IAccountUpdateManager
     {
-        Task<DatabaseResponseModel> PlaidSyncByUserIdAsync(string userId);
+        Task<BaseHttpResponse> PlaidSyncByUserIdAsync(string userId);
         Task<DatabaseResponseModel> PlaidSyncByItemIdAsync(JsonElement json);
     }
 }

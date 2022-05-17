@@ -18,6 +18,12 @@ namespace TooSimple_Poco.Models.ApiRequestModels
 
 		[JsonPropertyName("accountIdFilter")]
 		public string? AccountIdFilter { get; set; }
+
+		[JsonPropertyName("primaryCategoryFilter")]
+		public string? PrimaryCategoryFilter { get; set; }
+
+		[JsonPropertyName("detailedCategoryFilter")]
+		public string? DetailedCategoryFilter { get; set; }
 	}
 }
 

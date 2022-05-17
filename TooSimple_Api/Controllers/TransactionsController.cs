@@ -17,11 +17,12 @@ namespace TooSimple_Api.Controllers
 			_transactionManager = transactionManager;
 		}
 
-		[HttpGet("userId/{userId}")]
+		[HttpPost("searchTransactions")]
 		[ProducesResponseType(200)]
+		[ProducesResponseType(204)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(500)]
-		public async Task<GetTransactionsDto> GetTransactionsByUserId([FromBody] GetTransactionsRequestModel requestModel)
+		public async Task<GetTransactionsDto> SearchTransactions ([FromBody] GetTransactionsRequestModel requestModel)
 		{
             GetTransactionsDto transactionsDto = await _transactionManager.GetTransactionsByUserIdAsync(requestModel);
 			return transactionsDto;

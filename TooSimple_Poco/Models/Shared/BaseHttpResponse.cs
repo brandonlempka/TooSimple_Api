@@ -30,7 +30,7 @@ namespace TooSimple_Poco.Models.Shared
 			DatabaseResponseModel databaseResponseModel,
 			HttpStatusCode httpStatusCode = HttpStatusCode.OK)
         {
-			BaseHttpResponse response = new BaseHttpResponse();
+			BaseHttpResponse response = new();
 
 			if (!databaseResponseModel.Success)
             {
@@ -44,6 +44,24 @@ namespace TooSimple_Poco.Models.Shared
 			response.Success = databaseResponseModel.Success;
 			response.Status = httpStatusCode;
 			
+			return response;
+        }
+
+		/// <summary>
+        /// Creates a generic Ok response.
+        /// </summary>
+        /// <returns>
+        /// <see cref="BaseHttpResponse"/> with <see cref="HttpStatusCode"/>
+        /// OK and success set to true.
+        /// </returns>
+		public static BaseHttpResponse CreateOkResponse()
+        {
+			BaseHttpResponse response = new()
+            {
+				Status = HttpStatusCode.OK,
+				Success = true
+            };
+
 			return response;
         }
 	}

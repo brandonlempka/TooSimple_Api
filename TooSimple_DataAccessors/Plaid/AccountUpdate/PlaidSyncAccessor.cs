@@ -51,7 +51,7 @@ namespace TooSimple_DataAccessors.Plaid.AccountUpdate
         /// <returns>
         /// <see cref="AccountUpdateResponseModel"/> with new transactions.
         /// </returns>
-        public async Task<TransactionUpdateResponseModel> GetPlaidTransactionsAsync(
+        public async Task<PlaidGetTransactionsResponseModel> GetPlaidTransactionsAsync(
             TransactionUpdateRequestModel requestModel)
         {
             string json = JsonSerializer.Serialize(requestModel);
@@ -61,11 +61,11 @@ namespace TooSimple_DataAccessors.Plaid.AccountUpdate
                 "application/json");
 
             HttpResponseMessage response = await _httpClient.PostAsync(
-                $"{PlaidSettings.BaseUrl}/accounts/transactions/get",
+                $"{PlaidSettings.BaseUrl}/transactions/get",
                 stringContent);
 
-            TransactionUpdateResponseModel? responseModel = await JsonSerializer
-                .DeserializeAsync<TransactionUpdateResponseModel>(
+            PlaidGetTransactionsResponseModel? responseModel = await JsonSerializer
+                .DeserializeAsync<PlaidGetTransactionsResponseModel>(
                     response.Content.ReadAsStream());
 
             return responseModel ?? new()
