@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System.Data;
+using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.Entities;
 using TooSimple_Poco.Models.Shared;
 
@@ -61,9 +62,9 @@ namespace TooSimple_DataAccessors.Database.PlaidAccounts
         /// <returns>
         /// <see cref="PlaidAccount"/>Enumerable of account data.
         /// </returns>
-        public async Task<PlaidAccount> GetPlaidAccountsByItemIdAsync(string itemId)
+        public async Task<IEnumerable<PlaidAccount>> GetPlaidAccountsByItemIdAsync(string itemId)
         {
-            PlaidAccount plaidAccount;
+            IEnumerable<PlaidAccount> plaidAccount;
             using (MySqlConnection connection = new(_connectionString))
             {
                 await connection.OpenAsync();
@@ -86,7 +87,7 @@ namespace TooSimple_DataAccessors.Database.PlaidAccounts
                     FROM PlaidAccounts
                     WHERE ItemId = @ItemId";
 
-                plaidAccount = await connection.QueryFirstOrDefaultAsync<PlaidAccount>(
+                plaidAccount = await connection.QueryAsync<PlaidAccount>(
                     query, new { ItemId = itemId });
             }
 
@@ -180,6 +181,15 @@ namespace TooSimple_DataAccessors.Database.PlaidAccounts
             }
         }
 
+        /// <summary>
+        /// Deletes a plaid account from transactions and accounts tables.
+        /// </summary>
+        /// <param name="accountId">
+        /// Account Id to delete.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/> with success or any error messages.
+        /// </returns>
         public async Task<DatabaseResponseModel> DeleteAccountAsync(string accountId)
         {
             using MySqlConnection connection = new(_connectionString);
@@ -220,6 +230,220 @@ namespace TooSimple_DataAccessors.Database.PlaidAccounts
                 transaction.Rollback();
                 return DatabaseResponseModel.CreateError(ex);
             }
+        }
+
+        /// <summary>
+        /// Updates TooSimple database with latest plaid account balances.
+        /// </summary>
+        /// <param name="accounts"> IEnumerable of <see cref="PlaidAccount"/>
+        /// with new balances from plaid.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/> indicating success or failure.
+        /// </returns>
+        public async Task<DatabaseResponseModel> UpdateAccountBalancesAsync(
+            IEnumerable<PlaidAccount> accounts)
+        {
+            using MySqlConnection connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using (IDbTransaction transaction = connection.BeginTransaction())
+            {
+                string query = @"UPDATE PlaidAccounts
+                        SET CurrentBalance = @CurrentBalance
+                        , AvailableBalance = @AvailableBalance
+                        , CreditLimit = @Limit
+                        , LastUpdated = @Now
+                        WHERE PlaidAccountId = @Id";
+
+                try
+                { 
+                    foreach (PlaidAccount account in accounts)
+                    {
+                        await connection.ExecuteAsync(
+                            query,
+                            new
+                            {
+                                account.CurrentBalance,
+                                account.AvailableBalance,
+                                Limit = account.CreditLimit,
+                                Now = DateTime.UtcNow,
+                                Id = account.PlaidAccountId
+                            },
+                            transaction);
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return DatabaseResponseModel.CreateError(ex);
+                }
+            }
+
+            return DatabaseResponseModel.CreateSuccess();
+        }
+
+        /// <summary>
+        /// Locks or unlocks Plaid Account if credentials have expired.
+        /// </summary>
+        /// <param name="isLocked">
+        /// Boolean indicating whether to lock or unlock the account.
+        /// True = lock, false = unlock.
+        /// </param>
+        /// <param name="accountIds">
+        /// Account Ids to lock or unlock.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/>
+        /// Database response indicating success or failure.
+        /// </returns>
+        public async Task<DatabaseResponseModel> UpdateAccountRelogAsync(
+            bool isLocked,
+            string[] accountIds)
+        {
+            using MySqlConnection connection = new(_connectionString);
+            await connection.OpenAsync();
+            using IDbTransaction transaction = connection.BeginTransaction();
+
+            string query = @"UPDATE PlaidAccounts 
+                                    SET IsPlaidRelogRequired = @IsLocked
+                                    WHERE PlaidAccountId = @Id";
+
+            try
+            {
+                await connection.ExecuteAsync(
+                    query,
+                    new
+                    {
+                        IsLocked = isLocked,
+                        Id = accountIds
+                    },
+                    transaction);
+
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return DatabaseResponseModel.CreateError(ex);
+            }
+
+            return DatabaseResponseModel.CreateSuccess();
+        }
+
+        /// <summary>
+        /// Upserts new plaid transactions into local database.
+        /// </summary>
+        /// <param name="transactions">
+        /// IEnumerable of <see cref="PlaidTransaction"/>.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/> indicating success or failure.
+        /// </returns>
+        public async Task<DatabaseResponseModel> UpsertPlaidTransactionsAsync(
+            IEnumerable<PlaidTransaction> transactions)
+        {
+            using MySqlConnection connection = new(_connectionString);
+            await connection.OpenAsync();
+            using IDbTransaction transaction = connection.BeginTransaction();
+
+            string query = @"REPLACE INTO PlaidTransactions
+                            (
+                                PlaidTransactionId
+                                , AccountOwner
+                                , Amount
+                                , AuthorizedDate
+                                , TransactionDate
+                                , CategoryId
+                                , PrimaryCategory
+                                , DetailedCategory
+                                , CurrencyCode
+                                , Address
+                                , City
+                                , Country
+                                , Latitude
+                                , Longitude
+                                , PostalCode
+                                , Region
+                                , StoreNumber
+                                , MerchantName
+                                , Name
+                                , PaymentChannel
+                                , ByOrderOf
+                                , Payee
+                                , Payer
+                                , PaymentMethod
+                                , PaymentProcessor
+                                , PpdId
+                                , Reason
+                                , ReferenceNumber
+                                , IsPending
+                                , PendingTransactionId
+                                , TransactionCode
+                                , TransactionType
+                                , UnofficialCurrencyCode
+                                , SpendingFromGoalId
+                                , PlaidAccountId
+                                , UserAccountId
+                            )
+                            VALUES
+                            (
+                                @PlaidTransactionId
+                                , @AccountOwner
+                                , @Amount
+                                , @AuthorizedDate
+                                , @TransactionDate
+                                , @CategoryId
+                                , @PrimaryCategory
+                                , @DetailedCategory
+                                , @CurrencyCode
+                                , @Address
+                                , @City
+                                , @Country
+                                , @Latitude
+                                , @Longitude
+                                , @PostalCode
+                                , @Region
+                                , @StoreNumber
+                                , @MerchantName
+                                , @Name
+                                , @PaymentChannel
+                                , @ByOrderOf
+                                , @Payee
+                                , @Payer
+                                , @PaymentMethod
+                                , @PaymentProcessor
+                                , @PpdId
+                                , @Reason
+                                , @ReferenceNumber
+                                , @IsPending
+                                , @PendingTransactionId
+                                , @TransactionCode
+                                , @TransactionType
+                                , @UnofficialCurrencyCode
+                                , @SpendingFromGoalId
+                                , @PlaidAccountId
+                                , @UserAccountId
+                                );";
+
+            try
+            {
+                await connection.ExecuteAsync(
+                    query,
+                    transactions,
+                    transaction);
+
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return DatabaseResponseModel.CreateError(ex);
+            }
+
+            return DatabaseResponseModel.CreateSuccess();
         }
     }
 }

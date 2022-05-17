@@ -1,13 +1,12 @@
 ﻿using System.Text;
 using System.Text.Json;
-using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.Plaid.AccountUpdate;
 using TooSimple_Poco.Models.Plaid.Transactions;
 using TooSimple_Poco.Settings;
 
 namespace TooSimple_DataAccessors.Plaid.AccountUpdate
 {
-    public class PlaidAccountUpdateAccessor : IPlaidAccountUpdateAccessor
+    public class PlaidSyncAccessor : IPlaidSyncAccessor
     {
         private static readonly HttpClient _httpClient = new();
 
@@ -69,7 +68,10 @@ namespace TooSimple_DataAccessors.Plaid.AccountUpdate
                 .DeserializeAsync<TransactionUpdateResponseModel>(
                     response.Content.ReadAsStream());
 
-            return responseModel ?? new TransactionUpdateResponseModel();
+            return responseModel ?? new()
+            {
+                ErrorMessage = "Something went wrong."
+            };
         }
     }
 }

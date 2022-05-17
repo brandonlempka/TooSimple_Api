@@ -31,5 +31,29 @@ namespace TooSimple_Poco.Models.Plaid.Transactions
                 IncludePersonalFinanceCategory = true
             };
         }
+
+        /// <summary>
+        /// Creates new request token with count.
+        /// </summary>
+        /// <param name="accessToken">
+        /// Plaid access token associated with this series of accounts.
+        /// </param>
+        /// <param name="accountIds">
+        /// One plaid access token can be used with multiple account IDs if
+        /// they are added at the same time.
+        /// </param>        
+        public TransactionUpdateRequestModel(
+            string accessToken,
+            string[] accountIds,
+            int? count) : base()
+        {
+            AccessToken = accessToken;
+            Count = count ?? 50;
+            Options = new()
+            {
+                AccountIds = accountIds,
+                IncludePersonalFinanceCategory = true
+            };
+        }
     }
 }
