@@ -9,10 +9,10 @@ namespace TooSimple_Api.Controllers
 	[ApiController]
 	[Route("api/[controller]")]
 	[Authorize]
-	public class TransactionsController
+	public class PlaidTransactionsController
 	{
 		private readonly ITransactionManager _transactionManager;
-		public TransactionsController(ITransactionManager transactionManager)
+		public PlaidTransactionsController(ITransactionManager transactionManager)
 		{
 			_transactionManager = transactionManager;
 		}
