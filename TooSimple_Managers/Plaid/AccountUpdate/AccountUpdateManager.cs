@@ -61,13 +61,21 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                 };
             }
 
-
             foreach (IGrouping<string, PlaidAccount> group in accountGroups)
             {
+                var test1 = group.Where(x => x.IsPlaidRelogRequired);
+                var test2 = group.Select(x => x.PlaidAccountId);
+                var test3 = test2.ToArray();
+
                 string[] accountIds = group
                     .Where(account => !account.IsPlaidRelogRequired)
                     .Select(account => account.PlaidAccountId)
                     .ToArray();
+
+                if (accountIds.Length == 0)
+                {
+                    break;
+                }
 
                 TransactionUpdateRequestModel requestModel = new(group.Key, accountIds);
 
