@@ -88,5 +88,27 @@ namespace TooSimple_Api.Controllers
 
             return Ok();
         }
+
+        /// <summary>
+        /// Forces a full sync to plaid servers to look for updated balance
+        /// & transaction information.
+        /// </summary>
+        /// <param name="userId">
+        /// User Id to pull new info for.
+        /// </param>
+        /// <returns>
+        /// <see cref="BaseHttpResponse"/> base response indicating success
+        /// or failure.
+        /// </returns>
+        [Authorize]
+        [HttpGet("forcePlaidSync/{userId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public async Task<BaseHttpResponse> ForcePlaidSync(string userId)
+        {
+            BaseHttpResponse response = await _accountUpdateManager.PlaidSyncByUserIdAsync(userId);
+            return response;
+        }
     }
 }

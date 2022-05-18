@@ -41,6 +41,15 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
         /// </returns>
         public async Task<BaseHttpResponse> PlaidSyncByUserIdAsync(string userId)
         {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return new()
+                {
+                    ErrorMessage = "User Id was not found.",
+                    Status = HttpStatusCode.BadRequest
+                };
+            }
+
             IEnumerable<IGrouping<string, PlaidAccount>>? accountGroups = await GetAccountTokenGroups(userId);
 
             if (accountGroups is null)
