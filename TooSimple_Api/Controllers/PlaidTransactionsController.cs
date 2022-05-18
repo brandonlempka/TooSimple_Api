@@ -24,7 +24,7 @@ namespace TooSimple_Api.Controllers
 		[ProducesResponseType(500)]
 		public async Task<GetTransactionsDto> SearchTransactions ([FromBody] GetTransactionsRequestModel requestModel)
 		{
-            GetTransactionsDto transactionsDto = await _transactionManager.GetTransactionsByUserIdAsync(requestModel);
+            GetTransactionsDto transactionsDto = await _transactionManager.SearchPlaidTransactionsAsync(requestModel);
 			return transactionsDto;
 		}
 	}

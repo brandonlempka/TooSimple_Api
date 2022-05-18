@@ -1,22 +1,27 @@
 ﻿using System.Net;
+using TooSimple_DataAccessors.Database.PlaidAccounts;
 using TooSimple_DataAccessors.Database.Transactions;
 using TooSimple_Poco.Models.ApiRequestModels;
 using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.DataModels;
 using TooSimple_Poco.Models.Dtos.Transactions;
+using TooSimple_Poco.Models.Entities;
 
 namespace TooSimple_Managers.Transactions
 {
     public class TransactionManager : ITransactionManager
     {
         private readonly ITransactionsAccessor _transactionsAccessor;
-
-        public TransactionManager(ITransactionsAccessor transactionsAccessor)
+        private readonly IPlaidAccountAccessor _plaidAccountAccessor;
+        public TransactionManager(
+            ITransactionsAccessor transactionsAccessor,
+            IPlaidAccountAccessor plaidAccountAccessor)
         {
             _transactionsAccessor = transactionsAccessor;
+            _plaidAccountAccessor = plaidAccountAccessor;
         }
 
-        public async Task<GetTransactionsDto> GetTransactionsByUserIdAsync(GetTransactionsRequestModel requestModel)
+        public async Task<GetTransactionsDto> SearchPlaidTransactionsAsync(GetTransactionsRequestModel requestModel)
         {
             GetTransactionsDto validationResponse = ValidateRequest(requestModel);
             if (!validationResponse.Success)
@@ -32,11 +37,23 @@ namespace TooSimple_Managers.Transactions
                     Status = HttpStatusCode.NoContent
                 };
 
-            GetTransactionsDto responseDto = new GetTransactionsDto
+            IEnumerable<PlaidAccount> plaidAccounts = await _plaidAccountAccessor
+                .GetPlaidAccountsByUserIdAsync(requestModel.UserId);
+
+            if (!plaidAccounts.Any())
+                return new GetTransactionsDto
+                {
+                    ErrorMessage = "Couldn't fetch accounts.",
+                    Status = HttpStatusCode.InternalServerError
+                };
+
+            GetTransactionsDto responseDto = new()
             {
                 Success = true,
                 Status = HttpStatusCode.OK,
-                Transactions = transactions.Select(transaction => new TransactionDataModel(transaction))
+                Transactions = transactions.Select(transaction => new TransactionDataModel(
+                    transaction,
+                    plaidAccounts))
             };
 
             return responseDto;
@@ -52,7 +69,7 @@ namespace TooSimple_Managers.Transactions
         /// <see cref="GetTransactionsDto"/> with errors if any, or success if we
         /// can proceed.
         /// </returns>
-        private GetTransactionsDto ValidateRequest(GetTransactionsRequestModel requestModel)
+        private static GetTransactionsDto ValidateRequest(GetTransactionsRequestModel requestModel)
         {
             List<string> errors = new();
             if (string.IsNullOrWhiteSpace(requestModel.UserId))

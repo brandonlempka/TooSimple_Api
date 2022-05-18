@@ -5,6 +5,6 @@ namespace TooSimple_Managers.Transactions
 {
 	public interface ITransactionManager
 	{
-		Task<GetTransactionsDto> GetTransactionsByUserIdAsync(GetTransactionsRequestModel requestModel);
+		Task<GetTransactionsDto> SearchPlaidTransactionsAsync(GetTransactionsRequestModel requestModel);
 	}
 }

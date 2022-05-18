@@ -1,4 +1,5 @@
 ﻿using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.Entities;
 
 namespace TooSimple_Poco.Models.DataModels
 {
@@ -39,11 +40,14 @@ namespace TooSimple_Poco.Models.DataModels
 		public string? UnofficialCurrencyCode { get; set; }
 		public string? SpendingFromGoalId { get; set; }
 		public string? PlaidAccountId { get; set; }
-		public string? UserAccountId { get; set; }
+        public string PlaidAccountDisplayName { get; set; } = string.Empty;
+        public string? UserAccountId { get; set; }
 
 		public TransactionDataModel() { }
 
-        public TransactionDataModel(PlaidTransaction plaidTransaction)
+        public TransactionDataModel(
+            PlaidTransaction plaidTransaction,
+            IEnumerable<PlaidAccount> plaidAccounts)
         {
             PlaidTransactionId = plaidTransaction.PlaidTransactionId;
             AccountOwner = plaidTransaction.AccountOwner;
@@ -80,6 +84,11 @@ namespace TooSimple_Poco.Models.DataModels
             UnofficialCurrencyCode = plaidTransaction.UnofficialCurrencyCode;
             SpendingFromGoalId = plaidTransaction.SpendingFromGoalId;
             PlaidAccountId = plaidTransaction.PlaidAccountId;
+
+            PlaidAccount? account = plaidAccounts
+                .FirstOrDefault(account => account.PlaidAccountId == PlaidAccountId);
+
+            PlaidAccountDisplayName = account!.NickName ?? account.Name;
             UserAccountId = plaidTransaction.UserAccountId;
         }
     }
