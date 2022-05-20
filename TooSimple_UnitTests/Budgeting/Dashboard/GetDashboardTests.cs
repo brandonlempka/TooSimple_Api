@@ -33,13 +33,15 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 				{
 					IsActiveForBudgetingFeatures = false,
 					PlaidAccountTypeId = (int)PlaidAccountType.Checking,
-					AvailableBalance = 100
+					AvailableBalance = 100,
+					LastUpdated = DateTime.Now.AddDays(-30)
 				},
 				new()
 				{
 					IsActiveForBudgetingFeatures = true,
 					PlaidAccountTypeId = (int)PlaidAccountType.Savings,
-					AvailableBalance = 100
+					AvailableBalance = 100,
+					LastUpdated = DateTime.Now.AddDays(-30)
 				},
 				new()
 				{
@@ -47,21 +49,24 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 					PlaidAccountTypeId = (int)PlaidAccountType.Checking,
 					AvailableBalance = 100,
 					Name = "Hi",
-					PlaidAccountId = "123"
+					PlaidAccountId = "123",
+					LastUpdated = DateTime.Now.AddDays(-30)
 				},
 				new()
 				{
 					IsActiveForBudgetingFeatures = true,
 					PlaidAccountTypeId = (int)PlaidAccountType.CreditCard,
 					AvailableBalance = 50,
-					CreditLimit = 100
+					CreditLimit = 100,
+					LastUpdated = DateTime.Now.AddDays(-30)
 				},
 				new()
 				{
 					IsActiveForBudgetingFeatures = true,
 					PlaidAccountTypeId = (int)PlaidAccountType.CreditCard,
 					AvailableBalance = 50,
-					CreditLimit = 100
+					CreditLimit = 100,
+					LastUpdated = DateTime.Now.AddDays(-10)
 				},
 			};
 
@@ -154,6 +159,7 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 			Assert.AreEqual(100, response.CreditAmount);
 			Assert.AreEqual(50, response.GoalAmount);
 			Assert.AreEqual(100, response.ExpenseAmount);
+			Assert.AreEqual(DateTime.Now.AddDays(-10).Day, response.LastUpdated.Day);
 
 			Assert.IsNotNull(response.Transactions);
 			Assert.AreEqual(2, response.Transactions.Count());
@@ -195,6 +201,7 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 			Assert.AreEqual(100, response.CreditAmount);
 			Assert.AreEqual(50, response.GoalAmount);
 			Assert.AreEqual(100, response.ExpenseAmount);
+			Assert.AreEqual(DateTime.Now.AddDays(-10).Day, response.LastUpdated.Day);
 
 			Assert.IsNotNull(response.Transactions);
 			Assert.AreEqual(0, response.Transactions.Count());

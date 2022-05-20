@@ -10,6 +10,7 @@ namespace TooSimple_Poco.Models.Dtos.Budgeting
 		public decimal CreditAmount { get; set; }
 		public decimal GoalAmount { get; set; }
 		public decimal ExpenseAmount { get; set; }
+		public DateTime LastUpdated { get; set; }
 		public IEnumerable<TransactionDataModel>? Transactions { get; set; }
 	}
 }
