@@ -15,6 +15,7 @@
     <None Remove="Models\Dtos\Transactions\" />
     <None Remove="Models\ApiRequestModels\" />
     <None Remove="Models\Dtos\PlaidAccounts\" />
+    <None Remove="Models\Dtos\Budgeting\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\Dtos\" />
@@ -25,5 +26,6 @@
     <Folder Include="Models\Dtos\Transactions\" />
     <Folder Include="Models\ApiRequestModels\" />
     <Folder Include="Models\Dtos\PlaidAccounts\" />
+    <Folder Include="Models\Dtos\Budgeting\" />
   </ItemGroup>
 </Project>

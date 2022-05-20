@@ -8,4 +8,3 @@ namespace TooSimple_Poco.Models.Dtos.Transactions
 		public IEnumerable<TransactionDataModel> Transactions { get; set; } = Enumerable.Empty<TransactionDataModel>();
 	}
 }
-

@@ -22,6 +22,7 @@
     <None Remove="Auth\" />
     <None Remove="Transactions\" />
     <None Remove="PlaidSyncTests\" />
+    <None Remove="Budgeting\Dashboard\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TooSimple_DataAccessors\TooSimple_DataAccessors.csproj" />
@@ -31,5 +32,6 @@
     <Folder Include="Auth\" />
     <Folder Include="Transactions\" />
     <Folder Include="AccountUpdate\" />
+    <Folder Include="Budgeting\Dashboard\" />
   </ItemGroup>
 </Project>

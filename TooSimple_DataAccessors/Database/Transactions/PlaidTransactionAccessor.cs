@@ -6,11 +6,11 @@ using TooSimple_Poco.Models.Database;
 
 namespace TooSimple_DataAccessors.Database.Transactions
 {
-	public class TransactionsAccessor : ITransactionsAccessor
+	public class PlaidTransactionAccessor : IPlaidTransactionAccessor
     {
         private readonly string _connectionString;
 
-        public TransactionsAccessor(IConfiguration configuration)
+        public PlaidTransactionAccessor(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("TooSimpleMySql");
         }

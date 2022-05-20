@@ -73,7 +73,7 @@ builder.Services.AddTransient<IGoalAccessor, GoalAccessor>();
 builder.Services.AddTransient<ILoggingAccessor, LoggingAccessor>();
 builder.Services.AddTransient<IUserAccountAccessor, UserAccountAccessor>();
 builder.Services.AddTransient<IFundingScheduleAccessor, FundingScheduleAccessor>();
-builder.Services.AddTransient<ITransactionsAccessor, TransactionsAccessor>();
+builder.Services.AddTransient<IPlaidTransactionAccessor, PlaidTransactionAccessor>();
 builder.Services.AddTransient<IPlaidAccountAccessor, PlaidAccountAccessor>();
 
 builder.Services.AddTransient<ITokenExchangeManager, TokenExchangeManager>();
@@ -81,7 +81,7 @@ builder.Services.AddTransient<IAccountUpdateManager, AccountUpdateManager>();
 builder.Services.AddTransient<IBudgetingManager, BudgetingManager>();
 builder.Services.AddTransient<IGoalManager, GoalManager>();
 builder.Services.AddTransient<IAuthorizationManager, AuthorizationManager>();
-builder.Services.AddTransient<ITransactionManager, TransactionManager>();
+builder.Services.AddTransient<IPlaidTransactionManager, PlaidTransactionManager>();
 builder.Services.AddTransient<IPlaidAccountManager, PlaidAccountManager>();
 
 var app = builder.Build();
