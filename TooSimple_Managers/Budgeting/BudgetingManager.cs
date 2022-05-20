@@ -71,6 +71,10 @@ namespace TooSimple_Managers.Budgeting
                 .Select(expense => expense.AmountContributed)
                 .Sum();
 
+            DateTime lastUpdated = accounts
+                .Where(account => account.IsActiveForBudgetingFeatures)
+                .Max(account => account.LastUpdated) ?? DateTime.MinValue;
+
             GetTransactionsRequestModel transactionsRequestModel = new()
             {
                 UserId = userId
@@ -88,6 +92,7 @@ namespace TooSimple_Managers.Budgeting
                 ReadyToSpend = accountTotal - creditTotal - goalTotal - expenseTotal,
                 Transactions = plaidTransactions.Select(transaction => new TransactionDataModel(transaction, accounts)),
                 Success = true,
+                LastUpdated = lastUpdated,
                 Status = HttpStatusCode.OK
             };
 
