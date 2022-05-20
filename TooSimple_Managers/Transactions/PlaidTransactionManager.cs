@@ -9,12 +9,12 @@ using TooSimple_Poco.Models.Entities;
 
 namespace TooSimple_Managers.Transactions
 {
-    public class TransactionManager : ITransactionManager
+    public class PlaidTransactionManager : IPlaidTransactionManager
     {
-        private readonly ITransactionsAccessor _transactionsAccessor;
+        private readonly IPlaidTransactionAccessor _transactionsAccessor;
         private readonly IPlaidAccountAccessor _plaidAccountAccessor;
-        public TransactionManager(
-            ITransactionsAccessor transactionsAccessor,
+        public PlaidTransactionManager(
+            IPlaidTransactionAccessor transactionsAccessor,
             IPlaidAccountAccessor plaidAccountAccessor)
         {
             _transactionsAccessor = transactionsAccessor;

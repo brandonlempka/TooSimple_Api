@@ -1,7 +1,9 @@
-﻿namespace TooSimple_Managers.Budgeting
+﻿using TooSimple_Poco.Models.Dtos.Budgeting;
+
+namespace TooSimple_Managers.Budgeting
 {
     public interface IBudgetingManager
 	{
-        Task<decimal> GetUserReadyToSpendAsync(string userId);
+        Task<GetDashboardDto> GetUserDashboardAsync(string userId);
     }
 }

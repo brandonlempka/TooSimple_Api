@@ -11,12 +11,24 @@ namespace TooSimple_Api.Controllers
 	[Authorize]
 	public class PlaidTransactionsController
 	{
-		private readonly ITransactionManager _transactionManager;
-		public PlaidTransactionsController(ITransactionManager transactionManager)
+		private readonly IPlaidTransactionManager _transactionManager;
+		public PlaidTransactionsController(IPlaidTransactionManager transactionManager)
 		{
 			_transactionManager = transactionManager;
 		}
 
+		/// <summary>
+        /// Searches transactions using several optional filters.
+        /// Only required property is UserId.
+        /// </summary>
+        /// <param name="requestModel">
+        /// <see cref="GetTransactionsRequestModel"/> model with optional filters
+        /// & required userId property.
+        /// </param>
+        /// <returns>
+        /// <see cref="GetTransactionsDto"/> Dto with information about request
+        /// and transactions.
+        /// </returns>
 		[HttpPost("searchTransactions")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(204)]
