@@ -235,7 +235,7 @@ namespace TooSimple_Managers.Plaid.AccountUpdate
                     ReferenceNumber = transaction.PaymentMeta?.ReferenceNumber,
                     SpendingFromGoalId = null,
                     TransactionCode = transaction.TransactionCode,
-                    TransactionDate = transaction.Date ?? DateTime.UtcNow,
+                    TransactionDate = transaction.DateTime ?? transaction.Date ?? DateTime.UtcNow,
                     TransactionType = transaction.TransactionType
                 });
 

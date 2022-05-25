@@ -91,6 +91,9 @@ namespace TooSimple_Managers.Budgeting
                 ExpenseAmount = expenseTotal,
                 ReadyToSpend = accountTotal - creditTotal - goalTotal - expenseTotal,
                 Transactions = plaidTransactions.Select(transaction => new TransactionDataModel(transaction, accounts)),
+                Goals = goals
+                    .Where(goal => !goal.IsArchived)
+                    .Select(goal => new GoalDataModel(goal)),
                 Success = true,
                 LastUpdated = lastUpdated,
                 Status = HttpStatusCode.OK

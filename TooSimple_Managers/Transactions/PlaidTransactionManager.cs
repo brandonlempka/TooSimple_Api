@@ -6,6 +6,7 @@ using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.DataModels;
 using TooSimple_Poco.Models.Dtos.Transactions;
 using TooSimple_Poco.Models.Entities;
+using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Managers.Transactions
 {
@@ -21,6 +22,17 @@ namespace TooSimple_Managers.Transactions
             _plaidAccountAccessor = plaidAccountAccessor;
         }
 
+        /// <summary>
+        /// Filters transactions based on multiple optional filters.
+        /// If all are omitted will return everything.
+        /// </summary>
+        /// <param name="requestModel">
+        /// <see cref="GetTransactionsRequestModel"/> with optional parameters.
+        /// Only UserId is required.
+        /// </param>
+        /// <returns>
+        /// <see cref="GetTransactionsDto"/> Transactions response dto.
+        /// </returns>
         public async Task<GetTransactionsDto> SearchPlaidTransactionsAsync(GetTransactionsRequestModel requestModel)
         {
             GetTransactionsDto validationResponse = ValidateRequest(requestModel);
@@ -57,6 +69,44 @@ namespace TooSimple_Managers.Transactions
             };
 
             return responseDto;
+        }
+
+        /// <summary>
+        /// Calls database to update transaction with new spending goal Id.
+        /// </summary>
+        /// <param name="requestModel">
+        /// <see cref="UpdatePlaidTransactionRequestModel"/> request model with transaction Id
+        /// & new goal id, if any.
+        /// </param>
+        /// <returns>
+        /// <see cref="BaseHttpResponse"/> indicating success or failure.
+        /// </returns>
+        public async Task<BaseHttpResponse> UpdatePlaidTransactionAsync(UpdatePlaidTransactionRequestModel requestModel)
+        {
+            if (string.IsNullOrWhiteSpace(requestModel.PlaidTransactionId))
+            {
+                return new BaseHttpResponse
+                {
+                    ErrorMessage = "PlaidTransactionId is required.",
+                    Status = HttpStatusCode.BadRequest
+                };
+            }
+
+            DatabaseResponseModel databaseResponse = await _transactionsAccessor.UpdatePlaidTransactionAsync(requestModel);
+            if (!databaseResponse.Success)
+            {
+                return new BaseHttpResponse
+                {
+                    ErrorMessage = databaseResponse.ErrorMessage ?? "Something went wrong while updating.",
+                    Status = HttpStatusCode.InternalServerError
+                };
+            }
+
+            return new BaseHttpResponse
+            {
+                Status = HttpStatusCode.OK,
+                Success = true
+            };
         }
 
         /// <summary>

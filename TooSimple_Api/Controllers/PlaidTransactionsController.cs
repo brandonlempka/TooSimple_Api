@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TooSimple_Managers.Transactions;
 using TooSimple_Poco.Models.ApiRequestModels;
 using TooSimple_Poco.Models.Dtos.Transactions;
+using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_Api.Controllers
 {
@@ -39,5 +40,24 @@ namespace TooSimple_Api.Controllers
             GetTransactionsDto transactionsDto = await _transactionManager.SearchPlaidTransactionsAsync(requestModel);
 			return transactionsDto;
 		}
-	}
+
+        /// <summary>
+        /// Updates a goal with new data from user.
+        /// </summary>
+        /// <param name="goalDataModel">
+        /// Goal model with new data.
+        /// </param>
+        /// <returns>
+        /// Standard response with status and any error messages.
+        /// </returns>
+        [HttpPut]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public async Task<BaseHttpResponse> UpdateTransaction([FromBody] UpdatePlaidTransactionRequestModel requestModel)
+        {
+            BaseHttpResponse response = await _transactionManager.UpdatePlaidTransactionAsync(requestModel);
+            return response;
+        }
+    }
 }

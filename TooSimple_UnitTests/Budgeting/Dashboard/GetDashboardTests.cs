@@ -163,6 +163,9 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 
 			Assert.IsNotNull(response.Transactions);
 			Assert.AreEqual(2, response.Transactions.Count());
+
+			Assert.IsNotNull(response.Goals);
+			Assert.AreEqual(2, response.Goals.Count());
 		}
 
 		[TestMethod]
@@ -205,6 +208,51 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 
 			Assert.IsNotNull(response.Transactions);
 			Assert.AreEqual(0, response.Transactions.Count());
+		}
+
+		[TestMethod]
+		public async Task NoGoalsTest()
+		{
+			List<Goal>? noGoals = new();
+
+			Mock<IPlaidAccountAccessor> plaidAccountAccessorMock = new();
+			Mock<IPlaidTransactionAccessor> plaidTransactionsAccessorMock = new();
+			Mock<IGoalAccessor> goalAccessorMock = new();
+
+			plaidAccountAccessorMock.Setup(x =>
+				x.GetPlaidAccountsByUserIdAsync(It.IsAny<string>()))
+				.ReturnsAsync(_plaidAccounts!);
+
+			plaidTransactionsAccessorMock.Setup(x =>
+				x.GetPlaidTransactionsByUserIdAsync(It.IsAny<GetTransactionsRequestModel>()))
+				.ReturnsAsync(_plaidTransactions!);
+
+			goalAccessorMock.Setup(x =>
+				x.GetGoalsByUserIdAsync(It.IsAny<string>()))
+				.ReturnsAsync(noGoals!);
+
+			BudgetingManager budgetingManager = new(
+				goalAccessorMock.Object,
+				plaidAccountAccessorMock.Object,
+				plaidTransactionsAccessorMock.Object);
+
+			GetDashboardDto response = await budgetingManager.GetUserDashboardAsync("123");
+
+			Assert.IsNotNull(response);
+			Assert.IsTrue(response.Success);
+			Assert.AreEqual(HttpStatusCode.OK, response.Status);
+			Assert.AreEqual(100, response.ReadyToSpend);
+			Assert.AreEqual(200, response.DepositoryAmount);
+			Assert.AreEqual(100, response.CreditAmount);
+			Assert.AreEqual(0, response.GoalAmount);
+			Assert.AreEqual(0, response.ExpenseAmount);
+			Assert.AreEqual(DateTime.Now.AddDays(-10).Day, response.LastUpdated.Day);
+
+			Assert.IsNotNull(response.Transactions);
+			Assert.AreEqual(2, response.Transactions.Count());
+
+			Assert.IsNotNull(response.Goals);
+			Assert.AreEqual(0, response.Goals.Count());
 		}
 	}
 }

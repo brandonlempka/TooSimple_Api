@@ -1,8 +1,10 @@
-﻿using Dapper;
+﻿using System.Data;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using TooSimple_Poco.Models.ApiRequestModels;
 using TooSimple_Poco.Models.Database;
+using TooSimple_Poco.Models.Shared;
 
 namespace TooSimple_DataAccessors.Database.Transactions
 {
@@ -15,6 +17,16 @@ namespace TooSimple_DataAccessors.Database.Transactions
             _connectionString = configuration.GetConnectionString("TooSimpleMySql");
         }
 
+        /// <summary>
+        /// Returns transactions from database based on search criteria.
+        /// </summary>
+        /// <param name="requestModel">
+        /// <see cref="GetTransactionsRequestModel"/> request model with optional
+        /// search criteria. Only user ID is required.
+        /// </param>
+        /// <returns>
+        /// Enumerable of <see cref="PlaidTransaction"/> from database.
+        /// </returns>
         public async Task<IEnumerable<PlaidTransaction>> GetPlaidTransactionsByUserIdAsync(GetTransactionsRequestModel requestModel)
         {
             List<string> whereClauseList = new();
@@ -87,6 +99,8 @@ namespace TooSimple_DataAccessors.Database.Transactions
                 query += $" and {whereClause}";
             }
 
+            query += " ORDER BY TransactionDate DESC";
+
             IEnumerable<PlaidTransaction> transactions = await connection.QueryAsync<PlaidTransaction>(
                 query
                 , new
@@ -102,5 +116,46 @@ namespace TooSimple_DataAccessors.Database.Transactions
 
             return transactions;
         }
-	}
+
+        /// <summary>
+        /// Updates a transaction spent from goal.
+        /// </summary>
+        /// <param name="requestModel">
+        /// <see cref="UpdatePlaidTransactionRequestModel"/> request model with
+        /// plaid transaction Id and new goal Id if any.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/> indicating success or failure.
+        /// </returns>
+        public async Task<DatabaseResponseModel> UpdatePlaidTransactionAsync(UpdatePlaidTransactionRequestModel requestModel)
+        {
+            using MySqlConnection connection = new(_connectionString);
+            await connection.OpenAsync();
+            using IDbTransaction transaction = connection.BeginTransaction();
+
+            try
+            {
+                string query = @"UPDATE PlaidTransactions 
+                                SET SpendingFromGoalId = @SpendingFromGoalId
+                                WHERE PlaidTransactionId = @PlaidTransactionId";
+
+                await connection.ExecuteAsync(
+                    query,
+                    new
+                    {
+                        requestModel.SpendingFromGoalId,
+                        requestModel.PlaidTransactionId
+                    },
+                    transaction);
+
+                transaction.Commit();
+                return DatabaseResponseModel.CreateSuccess();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return DatabaseResponseModel.CreateError(ex);
+            }
+        }
+    }
 }

@@ -68,7 +68,7 @@ namespace TooSimple_UnitTests.AccountUpdate
 						IsPending = true,
 						Name = "Hi",
 						MerchantName = "A place",
-						Datetime = DateTime.Now,
+						DateTime = DateTime.Now,
 						PersonalFinanceCategory = new()
 						{
 							Primary = "TRANSPORTATION",
@@ -83,7 +83,7 @@ namespace TooSimple_UnitTests.AccountUpdate
 						IsPending = false,
 						Name = "Hi",
 						MerchantName = "A place",
-						Datetime = DateTime.Now,
+						DateTime = DateTime.Now,
 						PersonalFinanceCategory = new()
 						{
 							Primary = "TRANSPORTATION",
@@ -98,7 +98,7 @@ namespace TooSimple_UnitTests.AccountUpdate
 						IsPending = false,
 						Name = "Hi",
 						MerchantName = "A place",
-						Datetime = DateTime.Now,
+						DateTime = DateTime.Now,
 						PersonalFinanceCategory = new()
 						{
 							Primary = "TRANSPORTATION",

@@ -32,7 +32,7 @@ namespace TooSimple_Poco.Models.Plaid.Transactions
         public DateTime? Date { get; set; }
 
         [JsonPropertyName("datetime")]
-        public DateTime? Datetime { get; set; }
+        public DateTime? DateTime { get; set; }
 
         [JsonPropertyName("iso_currency_code")]
         public string? IsoCurrencyCode { get; set; }
