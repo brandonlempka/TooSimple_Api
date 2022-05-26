@@ -87,8 +87,7 @@ namespace TooSimple_Poco.Models.DataModels
             DateTime nextDueDate = DesiredCompletionDate;
 
             if (IsExpense)
-                nextDueDate = GetNextExpenseContributionDate(now);
-            
+                nextDueDate = GetExpenseDueDate(now);
 
             if (now < nextDueDate)
             {
@@ -125,7 +124,8 @@ namespace TooSimple_Poco.Models.DataModels
                     case (int)ContributionSchedule.Monthly:
                         numberOfContributionsRemaining = GetNumberOfMonthsRemaining(
                             ContributionSchedule.Monthly,
-                            now);
+                            now,
+                            nextDueDate);
                         nextContributionDate = FundingSchedule.FirstContributionDate;
 
                         while (nextContributionDate <= now)
@@ -137,7 +137,8 @@ namespace TooSimple_Poco.Models.DataModels
                     case (int)ContributionSchedule.BiMonthly:
                         numberOfContributionsRemaining = GetNumberOfMonthsRemaining(
                             ContributionSchedule.BiMonthly,
-                            now);
+                            now,
+                            nextDueDate);
                         nextContributionDate = FundingSchedule.FirstContributionDate;
 
                         while (nextContributionDate <= now)
@@ -149,7 +150,8 @@ namespace TooSimple_Poco.Models.DataModels
                     case (int)ContributionSchedule.LastDayOfMonth:
                         numberOfContributionsRemaining = GetNumberOfMonthsRemaining(
                             ContributionSchedule.LastDayOfMonth,
-                            now);
+                            now,
+                            nextDueDate);
                         nextContributionDate = FundingSchedule.FirstContributionDate;
 
                         while (nextContributionDate < now)
@@ -167,6 +169,12 @@ namespace TooSimple_Poco.Models.DataModels
 
                 if (IsContributionFixed)
                 {
+                    return;
+                }
+
+                if (numberOfContributionsRemaining == 0)
+                {
+                    NextContributionAmount = 0;
                     return;
                 }
 
@@ -192,11 +200,11 @@ namespace TooSimple_Poco.Models.DataModels
         /// <returns>
         /// DateTime of next expense contribution.
         /// </returns>
-        private DateTime GetNextExpenseContributionDate(DateTime now)
+        private DateTime GetExpenseDueDate(DateTime now)
         {
             DateTime nextContributionDate = DesiredCompletionDate;
 
-            while (nextContributionDate > now)
+            while (nextContributionDate <= now)
             {
                 switch (RecurrenceTimeFrame)
                 {
@@ -212,11 +220,18 @@ namespace TooSimple_Poco.Models.DataModels
                     case (int)ExpenseFrequency.BiMonthly:
                         nextContributionDate = nextContributionDate.AddMonths(2);
                         break;
+                    case (int)ExpenseFrequency.ThreeMonths:
+                        nextContributionDate = nextContributionDate.AddMonths(3);
+                        break;
                     case (int)ExpenseFrequency.SixMonths:
                         nextContributionDate = nextContributionDate.AddMonths(6);
                         break;
                     case (int)ExpenseFrequency.Yearly:
                         nextContributionDate = nextContributionDate.AddYears(1);
+                        break;
+                    default:
+                        // safety to break while loop.
+                        nextContributionDate.AddYears(10000);
                         break;
                 }
             }
@@ -238,14 +253,15 @@ namespace TooSimple_Poco.Models.DataModels
         /// </returns>
         private int GetNumberOfMonthsRemaining(
             ContributionSchedule fundingSchedule,
-            DateTime currentDate)
+            DateTime currentDate,
+            DateTime dueDate)
         {
             int counter = 0;
             int numberOfMonthsToSkip = fundingSchedule == ContributionSchedule.BiMonthly
                 ? 2
                 : 1;
 
-            while (currentDate < DesiredCompletionDate)
+            while (currentDate < dueDate)
             {
                 counter++;
                 currentDate = currentDate.AddMonths(numberOfMonthsToSkip);
