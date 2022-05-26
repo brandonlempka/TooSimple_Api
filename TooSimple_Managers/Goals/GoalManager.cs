@@ -170,7 +170,10 @@ namespace TooSimple_Managers.Goals
             goalDataModel.CreationDate = DateTime.UtcNow;
             goalDataModel.GetNextContribution();
 
-            Goal goal = new(goalDataModel);
+            Goal goal = new(goalDataModel)
+            {
+                GoalId = Guid.NewGuid().ToString()
+            };
 
             DatabaseResponseModel responseModel = await _goalAccessor.AddNewGoalAsync(goal);
             

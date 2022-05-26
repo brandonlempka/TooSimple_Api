@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TooSimple_Managers.Budgeting;
 using TooSimple_Managers.Plaid.AccountUpdate;
+using TooSimple_Poco.Models.DataModels;
 using TooSimple_Poco.Models.Dtos.Budgeting;
 using TooSimple_Poco.Models.Shared;
 
@@ -54,6 +55,15 @@ namespace TooSimple_Api.Controllers
 		public async Task<GetDashboardDto> GetDashboardDto(string userId)
         {
             GetDashboardDto response = await _budgetingManager.GetUserDashboardAsync(userId);
+			return response;
+        }
+
+        [HttpPost("moveMoney")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(500)]
+		public async Task<BaseHttpResponse> SaveMoveMoney(FundingHistoryDataModel fundingHistoryDataModel)
+        {
+			BaseHttpResponse response = await _budgetingManager.MoveMoneyAsync(fundingHistoryDataModel);
 			return response;
         }
  	}

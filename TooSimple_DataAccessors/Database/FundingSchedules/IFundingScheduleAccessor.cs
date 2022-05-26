@@ -6,7 +6,7 @@ namespace TooSimple_DataAccessors.Database.FundingSchedules
     public interface IFundingScheduleAccessor
 	{
 		Task<IEnumerable<FundingSchedule>> GetFundingSchedulesByUserIdAsync(string userId);
-
+		Task<FundingSchedule> GetFundingSchedulesByScheduleIdAsync(string scheduleId);
 	}
 }
 

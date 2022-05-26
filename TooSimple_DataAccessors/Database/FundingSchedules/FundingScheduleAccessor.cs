@@ -25,7 +25,7 @@ namespace TooSimple_DataAccessors.Database.FundingSchedules
         /// </returns>
         public async Task<IEnumerable<FundingSchedule>> GetFundingSchedulesByUserIdAsync(string userId)
         {
-            IEnumerable<FundingSchedule> fundingHistories = Enumerable.Empty<FundingSchedule>();
+            IEnumerable<FundingSchedule> fundingSchedules = Enumerable.Empty<FundingSchedule>();
             using (MySqlConnection connection = new(_connectionString))
             {
                 await connection.OpenAsync();
@@ -38,7 +38,7 @@ namespace TooSimple_DataAccessors.Database.FundingSchedules
                                 FROM FundingSchedules
                                 WHERE UserAccountId = @userId;";
 
-                fundingHistories = await connection.QueryAsync<FundingSchedule>(
+                fundingSchedules = await connection.QueryAsync<FundingSchedule>(
                     query
                     , new
                     {
@@ -46,7 +46,43 @@ namespace TooSimple_DataAccessors.Database.FundingSchedules
                     });
             }
 
-            return fundingHistories;
+            return fundingSchedules;
+        }
+
+        /// <summary>
+        /// Retrieves single funding history by its Id.
+        /// </summary>
+        /// <param name="scheduleId">
+        /// Funding Schedule ID to run against.
+        /// </param>
+        /// <returns>
+        /// <see cref="FundingSchedule"/>
+        /// </returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<FundingSchedule> GetFundingSchedulesByScheduleIdAsync(string scheduleId)
+        {
+            FundingSchedule fundingSchedule = new();
+            using (MySqlConnection connection = new(_connectionString))
+            {
+                await connection.OpenAsync();
+                string query = @"SELECT
+                                    FundingScheduleId
+                                    , FundingScheduleName
+                                    , Frequency
+                                    , FirstContributionDate
+                                    , UserAccountId
+                                FROM FundingSchedules
+                                WHERE FundingScheduleId = @scheduleId;";
+
+                fundingSchedule = await connection.QueryFirstOrDefaultAsync<FundingSchedule>(
+                    query
+                    , new
+                    {
+                        scheduleId
+                    });
+            }
+
+            return fundingSchedule;
         }
     }
 }

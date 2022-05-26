@@ -251,7 +251,7 @@ namespace TooSimple_Poco.Models.DataModels
         /// <returns>
         /// Int of number of months remaining.
         /// </returns>
-        private int GetNumberOfMonthsRemaining(
+        private static int GetNumberOfMonthsRemaining(
             ContributionSchedule fundingSchedule,
             DateTime currentDate,
             DateTime dueDate)

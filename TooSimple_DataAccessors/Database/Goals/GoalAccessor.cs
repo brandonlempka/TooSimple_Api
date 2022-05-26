@@ -115,13 +115,13 @@ namespace TooSimple_DataAccessors.Database.Goals
         /// <summary>
         /// Adds new goal to database.
         /// </summary>
-        /// <param name="goalDataModel">
+        /// <param name="goal">
         /// Goal data model from user.
         /// </param>
         /// <returns>
         /// <see cref="DatabaseResponseModel"/> with success or any error messages.
         /// </returns>
-        public async Task<DatabaseResponseModel> AddNewGoalAsync(Goal goalDataModel)
+        public async Task<DatabaseResponseModel> AddNewGoalAsync(Goal goal)
         {
             using MySqlConnection connection = new(_connectionString);
             await connection.OpenAsync();
@@ -176,24 +176,24 @@ namespace TooSimple_DataAccessors.Database.Goals
                     query,
                     new
                     {
-                        goalDataModel.GoalId,
-                        goalDataModel.GoalName,
-                        goalDataModel.GoalAmount,
-                        goalDataModel.DesiredCompletionDate,
-                        goalDataModel.UserAccountId,
-                        goalDataModel.FundingScheduleId,
-                        goalDataModel.IsExpense,
-                        goalDataModel.RecurrenceTimeFrame,
-                        goalDataModel.CreationDate,
-                        goalDataModel.IsPaused,
-                        goalDataModel.AutoSpendMerchantName,
-                        goalDataModel.AmountContributed,
-                        goalDataModel.AmountSpent,
-                        goalDataModel.IsAutoRefillEnabled,
-                        goalDataModel.NextContributionAmount,
-                        goalDataModel.NextContributionDate,
-                        goalDataModel.IsContributionFixed,
-                        goalDataModel.IsArchived,
+                        goal.GoalId,
+                        goal.GoalName,
+                        goal.GoalAmount,
+                        goal.DesiredCompletionDate,
+                        goal.UserAccountId,
+                        goal.FundingScheduleId,
+                        goal.IsExpense,
+                        goal.RecurrenceTimeFrame,
+                        goal.CreationDate,
+                        goal.IsPaused,
+                        goal.AutoSpendMerchantName,
+                        goal.AmountContributed,
+                        goal.AmountSpent,
+                        goal.IsAutoRefillEnabled,
+                        goal.NextContributionAmount,
+                        goal.NextContributionDate,
+                        goal.IsContributionFixed,
+                        goal.IsArchived,
                     },
                     transaction);
 
@@ -348,5 +348,141 @@ namespace TooSimple_DataAccessors.Database.Goals
             return histories;
         }
 
+        /// <summary>
+        /// Saves a move money request to move money between goals or to/from
+        /// ready to spend (if source or destination is null).
+        /// </summary>
+        /// <param name="fundingHistory">
+        /// <see cref="FundingHistory"/> information about source & destination goals.
+        /// </param>
+        /// <returns>
+        /// <see cref="DatabaseResponseModel"/> with success or any error messages.
+        /// </returns>
+        public async Task<DatabaseResponseModel> SaveMoveMoneyAsync(FundingHistory fundingHistory)
+        {
+            using MySqlConnection connection = new(_connectionString);
+            await connection.OpenAsync();
+            using IDbTransaction transaction = connection.BeginTransaction();
+
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(fundingHistory.SourceGoalId))
+                {
+                    Goal goal = new();
+                    string query = @"SELECT
+                    GoalId
+                    , GoalName
+                    , GoalAmount
+                    , DesiredCompletionDate
+                    , UserAccountId
+                    , FundingScheduleId
+                    , IsExpense
+                    , RecurrenceTimeFrame
+                    , CreationDate
+                    , IsPaused
+                    , AutoSpendMerchantName
+                    , AmountContributed
+                    , AmountSpent
+                    , IsAutoRefillEnabled
+                    , NextContributionAmount
+                    , NextContributionDate
+                    , IsContributionFixed
+                    , IsArchived
+                    FROM Goals
+                    WHERE GoalId = @GoalId";
+
+                    goal = await connection.QueryFirstOrDefaultAsync<Goal>(
+                        query,
+                        new
+                        {
+                            GoalId = fundingHistory.SourceGoalId
+                        });
+
+                    string sourceUpdateQuery = string.Empty;
+
+                    if (goal.IsExpense)
+                    {
+                        sourceUpdateQuery = @"UPDATE Goals
+                                            SET AmountContributed = AmountContributed - @Amount
+                                            WHERE GoalId = @SourceGoalId";
+                    }
+                    else
+                    {
+                        sourceUpdateQuery = @"UPDATE Goals
+                                            SET AmountSpent = AmountSpent + @Amount
+                                            WHERE GoalId = @SourceGoalId";
+                    }
+
+                    await connection.ExecuteAsync(
+                        sourceUpdateQuery,
+                        new
+                        {
+                            fundingHistory.Amount,
+                            fundingHistory.SourceGoalId
+                        },
+                        transaction);
+                }
+
+                if (!string.IsNullOrWhiteSpace(fundingHistory.DestinationGoalId))
+                {
+
+                    string destinationUpdateQuery = @"UPDATE Goals
+                                            SET AmountContributed = AmountContributed + @Amount
+                                            WHERE GoalId = @DestinationGoalId";
+
+                    await connection.ExecuteAsync(
+                        destinationUpdateQuery,
+                        new
+                        {
+                            fundingHistory.Amount,
+                            fundingHistory.DestinationGoalId
+                        },
+                        transaction);
+                }
+
+                string fundingHistoryQuery = @"INSERT INTO FundingHistory
+                                            (
+                                                FundingHistoryId
+                                                , SourceGoalId
+                                                , DestinationGoalId
+                                                , Amount
+                                                , TransferDate
+                                                , Note
+                                                , IsAutomatedTransfer
+                                            )
+                                            VALUES
+                                            (
+                                                @FundingHistoryId
+                                                , @SourceGoalId
+                                                , @DestinationGoalId
+                                                , @Amount
+                                                , @TransferDate
+                                                , @Note
+                                                , @IsAutomatedTransfer
+                                            );";
+
+                await connection.ExecuteAsync(
+                    fundingHistoryQuery,
+                    new
+                    {
+                        fundingHistory.FundingHistoryId,
+                        fundingHistory.SourceGoalId,
+                        fundingHistory.DestinationGoalId,
+                        fundingHistory.Amount,
+                        fundingHistory.TransferDate,
+                        fundingHistory.Note,
+                        fundingHistory.IsAutomatedTransfer
+                    },
+                    transaction);
+
+                transaction.Commit();
+                return DatabaseResponseModel.CreateSuccess();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return DatabaseResponseModel.CreateError(ex);
+            }
+        }
     }
 }

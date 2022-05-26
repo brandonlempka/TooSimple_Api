@@ -11,6 +11,7 @@ namespace TooSimple_DataAccessors.Database.Goals
         Task<DatabaseResponseModel> UpdateGoalAsync(Goal goal);
         Task<DatabaseResponseModel> DeleteGoalAsync(string goalId);
         Task<IEnumerable<FundingHistory>> GetFundingHistoryByGoalId(string goalId);
+        Task<DatabaseResponseModel> SaveMoveMoneyAsync(FundingHistory fundingHistory);
     }
 }
 
