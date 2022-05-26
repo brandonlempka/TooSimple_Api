@@ -8,5 +8,6 @@ namespace TooSimple_Managers.Budgeting
 	{
         Task<GetDashboardDto> GetUserDashboardAsync(string userId);
         Task<BaseHttpResponse> MoveMoneyAsync(FundingHistoryDataModel fundingHistoryDataModel);
+        Task<BaseHttpResponse> UpdateUserBudgetByUserIdAsync(string userId, DateTime? today = null);
     }
 }

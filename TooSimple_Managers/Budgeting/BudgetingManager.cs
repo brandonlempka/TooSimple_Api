@@ -145,7 +145,9 @@ namespace TooSimple_Managers.Budgeting
 
             DatabaseResponseModel databaseResponseModel = await _goalAccessor.SaveMoveMoneyAsync(fundingHistory);
 
-            if (!databaseResponseModel.Success)
+            // Check if automated transfer. If so we don't want to get the next contribution info yet.
+            if (!databaseResponseModel.Success
+                || fundingHistoryDataModel.IsAutomatedTransfer)
             {
                 return BaseHttpResponse.CreateResponseFromDb(databaseResponseModel);
             }
@@ -163,6 +165,88 @@ namespace TooSimple_Managers.Budgeting
             }
 
             return BaseHttpResponse.CreateResponseFromDb(nextContributionResponse);
+        }
+
+        /// <summary>
+        /// Updates the user's goals. If the user hasn't logged in in awhile
+        /// we backdate any 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="today"></param>
+        /// <returns></returns>
+        public async Task<BaseHttpResponse> UpdateUserBudgetByUserIdAsync(string userId, DateTime? today = null)
+        {
+            IEnumerable<Goal> goals = await _goalAccessor.GetGoalsByUserIdAsync(userId);
+            if (!goals.Any())
+            {
+                return new BaseHttpResponse
+                {
+                    Status = HttpStatusCode.NoContent,
+                    Success = true
+                };
+            }
+
+            goals = goals.Where(goal => !goal.IsArchived && !goal.IsPaused);
+
+            DateTime todayDate = today.HasValue
+                ? today.Value.Date
+                : DateTime.UtcNow.Date;
+
+            foreach (Goal goal in goals)
+            {
+                if (goal.NextContributionDate <= todayDate)
+                {
+                    FundingSchedule fundingSchedule = await _fundingScheduleAccessor
+                        .GetFundingSchedulesByScheduleIdAsync(goal.FundingScheduleId);
+
+                    GoalDataModel goalDataModel = new(goal)
+                    {
+                        FundingSchedule = new(fundingSchedule)
+                    };
+
+                    while (goalDataModel.NextContributionDate <= todayDate
+                        || (!goalDataModel.IsExpense
+                            && goalDataModel.DesiredCompletionDate > goalDataModel.NextContributionDate))
+                    {
+                        FundingHistoryDataModel fundingHistory = new()
+                        {
+                            DestinationGoalId = goalDataModel.GoalId,
+                            Amount = goalDataModel.NextContributionAmount,
+                            TransferDate = goalDataModel.NextContributionDate,
+                            IsAutomatedTransfer = true,
+                            Note = $"Automated transfer for {fundingSchedule.FundingScheduleName}"
+                        };
+
+                        if (fundingHistory.Amount <= 0)
+                        {
+                            break;
+                        }
+
+                        BaseHttpResponse moveMoneyResponse = await MoveMoneyAsync(fundingHistory);
+
+                        if (!moveMoneyResponse.Success)
+                        {
+                            return moveMoneyResponse;
+                        }
+
+                        goalDataModel.AmountContributed += fundingHistory.Amount;
+                        goalDataModel.GetNextContribution(goalDataModel.NextContributionDate);
+                    }
+
+                    if (goal.NextContributionDate != goalDataModel.NextContributionDate)
+                    {
+                        Goal updatedGoal = new(goalDataModel);
+                        DatabaseResponseModel databaseResponseModel = await _goalAccessor.UpdateGoalAsync(updatedGoal);
+
+                        if (!databaseResponseModel.Success)
+                        {
+                            return BaseHttpResponse.CreateResponseFromDb(databaseResponseModel);
+                        }
+                    }
+                }
+            }
+
+            return BaseHttpResponse.CreateOkResponse();
         }
 
         /// <summary>

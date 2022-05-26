@@ -66,5 +66,11 @@ namespace TooSimple_Api.Controllers
 			BaseHttpResponse response = await _budgetingManager.MoveMoneyAsync(fundingHistoryDataModel);
 			return response;
         }
+
+        [HttpGet("updateBudget/{userId}")]
+		public async Task UpdateBudget(string userId)
+        {
+			await _budgetingManager.UpdateUserBudgetByUserIdAsync(userId);
+        }
  	}
 }

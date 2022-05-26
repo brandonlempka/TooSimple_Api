@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using TooSimple_DataAccessors.Database.FundingSchedules;
 using TooSimple_DataAccessors.Database.Goals;
 using TooSimple_DataAccessors.Database.PlaidAccounts;
 using TooSimple_DataAccessors.Database.Transactions;
@@ -131,6 +132,7 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 			Mock<IPlaidAccountAccessor> plaidAccountAccessorMock = new();
 			Mock<IPlaidTransactionAccessor> plaidTransactionsAccessorMock = new();
 			Mock<IGoalAccessor> goalAccessorMock = new();
+			Mock<IFundingScheduleAccessor> fundingScheduleAccessorMock = new();
 
 			plaidAccountAccessorMock.Setup(x =>
 				x.GetPlaidAccountsByUserIdAsync(It.IsAny<string>()))
@@ -147,7 +149,8 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 			BudgetingManager budgetingManager = new(
 				goalAccessorMock.Object,
 				plaidAccountAccessorMock.Object,
-				plaidTransactionsAccessorMock.Object);
+				plaidTransactionsAccessorMock.Object,
+				fundingScheduleAccessorMock.Object);
 
 			GetDashboardDto response = await budgetingManager.GetUserDashboardAsync("123");
 
@@ -176,6 +179,7 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 			Mock<IPlaidAccountAccessor> plaidAccountAccessorMock = new();
 			Mock<IPlaidTransactionAccessor> plaidTransactionsAccessorMock = new();
 			Mock<IGoalAccessor> goalAccessorMock = new();
+			Mock<IFundingScheduleAccessor> fundingScheduleAccessorMock = new();
 
 			plaidAccountAccessorMock.Setup(x =>
 				x.GetPlaidAccountsByUserIdAsync(It.IsAny<string>()))
@@ -192,7 +196,8 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 			BudgetingManager budgetingManager = new(
 				goalAccessorMock.Object,
 				plaidAccountAccessorMock.Object,
-				plaidTransactionsAccessorMock.Object);
+				plaidTransactionsAccessorMock.Object,
+				fundingScheduleAccessorMock.Object);
 
 			GetDashboardDto response = await budgetingManager.GetUserDashboardAsync("123");
 
@@ -218,6 +223,7 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 			Mock<IPlaidAccountAccessor> plaidAccountAccessorMock = new();
 			Mock<IPlaidTransactionAccessor> plaidTransactionsAccessorMock = new();
 			Mock<IGoalAccessor> goalAccessorMock = new();
+			Mock<IFundingScheduleAccessor> fundingScheduleAccessorMock = new();
 
 			plaidAccountAccessorMock.Setup(x =>
 				x.GetPlaidAccountsByUserIdAsync(It.IsAny<string>()))
@@ -234,7 +240,8 @@ namespace TooSimple_UnitTests.Budgeting.Dashboard
 			BudgetingManager budgetingManager = new(
 				goalAccessorMock.Object,
 				plaidAccountAccessorMock.Object,
-				plaidTransactionsAccessorMock.Object);
+				plaidTransactionsAccessorMock.Object,
+				fundingScheduleAccessorMock.Object);
 
 			GetDashboardDto response = await budgetingManager.GetUserDashboardAsync("123");
 
