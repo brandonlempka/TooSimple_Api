@@ -192,22 +192,47 @@ namespace TooSimple_Managers.Budgeting
                 ? today.Value.Date
                 : DateTime.UtcNow.Date;
 
+            IEnumerable<FundingSchedule> fundingSchedules = await _fundingScheduleAccessor
+                .GetFundingSchedulesByUserIdAsync(userId);
+
+            if (!fundingSchedules.Any())
+            {
+                return new BaseHttpResponse
+                {
+                    Status = HttpStatusCode.InternalServerError,
+                    ErrorMessage = "No funding schedules were returned for user."
+                };
+            }
+
             foreach (Goal goal in goals)
             {
                 if (goal.NextContributionDate <= todayDate)
                 {
-                    FundingSchedule fundingSchedule = await _fundingScheduleAccessor
-                        .GetFundingSchedulesByScheduleIdAsync(goal.FundingScheduleId);
+                    FundingSchedule? fundingSchedule = fundingSchedules
+                        .FirstOrDefault(schedule => schedule.FundingScheduleId == goal.FundingScheduleId);
+
+                    if (fundingSchedule is null)
+                    {
+                        return new BaseHttpResponse
+                        {
+                            Status = HttpStatusCode.InternalServerError,
+                            ErrorMessage = $"Funding Schedule was not found for goal {goal.GoalId}."
+                        };
+                    }
 
                     GoalDataModel goalDataModel = new(goal)
                     {
                         FundingSchedule = new(fundingSchedule)
                     };
 
-                    while (goalDataModel.NextContributionDate <= todayDate
-                        || (!goalDataModel.IsExpense
-                            && goalDataModel.DesiredCompletionDate > goalDataModel.NextContributionDate))
+                    while (goalDataModel.NextContributionDate <= todayDate)
                     {
+                        if (goalDataModel.NextContributionAmount <= 0)
+                        {
+                            goalDataModel.GetNextContribution();
+                            break;
+                        }
+
                         FundingHistoryDataModel fundingHistory = new()
                         {
                             DestinationGoalId = goalDataModel.GoalId,
@@ -217,10 +242,6 @@ namespace TooSimple_Managers.Budgeting
                             Note = $"Automated transfer for {fundingSchedule.FundingScheduleName}"
                         };
 
-                        if (fundingHistory.Amount <= 0)
-                        {
-                            break;
-                        }
 
                         BaseHttpResponse moveMoneyResponse = await MoveMoneyAsync(fundingHistory);
 

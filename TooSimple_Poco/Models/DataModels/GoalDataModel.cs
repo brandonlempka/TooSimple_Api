@@ -84,10 +84,9 @@ namespace TooSimple_Poco.Models.DataModels
 
 
             DateTime now = currentDate ?? DateTime.UtcNow.Date;
-            DateTime nextDueDate = DesiredCompletionDate;
-
-            if (IsExpense)
-                nextDueDate = GetExpenseDueDate(now);
+            DateTime nextDueDate = IsExpense
+                ? GetExpenseDueDate(now)
+                : DesiredCompletionDate;
 
             if (now < nextDueDate)
             {
@@ -178,7 +177,7 @@ namespace TooSimple_Poco.Models.DataModels
                     return;
                 }
 
-                if (IsAutoRefillEnabled)
+                if (IsAutoRefillEnabled && !IsExpense)
                 {
                     decimal amountLeftToSave = GoalAmount - AmountContributed + AmountSpent;
                     NextContributionAmount = Math.Round(amountLeftToSave / numberOfContributionsRemaining, 2);
@@ -188,6 +187,10 @@ namespace TooSimple_Poco.Models.DataModels
                     decimal amountLeftToSave = GoalAmount - AmountContributed;
                     NextContributionAmount = Math.Round(amountLeftToSave / numberOfContributionsRemaining, 2);
                 }
+            }
+            else
+            {
+                NextContributionDate = DateTime.MaxValue;
             }
         }
 
