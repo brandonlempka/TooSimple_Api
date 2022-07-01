@@ -7,6 +7,7 @@ namespace TooSimple_DataAccessors.Database.Transactions
 	public interface IPlaidTransactionAccessor
 	{
 		Task<IEnumerable<PlaidTransaction>> GetPlaidTransactionsByUserIdAsync(GetTransactionsRequestModel requestModel);
-		Task<DatabaseResponseModel> UpdatePlaidTransactionAsync(UpdatePlaidTransactionRequestModel requestModel);
+		Task<PlaidTransaction?> GetPlaidTransactionByIdAsync(string plaidTransactionId);
+        Task<DatabaseResponseModel> UpdatePlaidTransactionAsync(UpdatePlaidTransactionRequestModel requestModel);
 	}
 }

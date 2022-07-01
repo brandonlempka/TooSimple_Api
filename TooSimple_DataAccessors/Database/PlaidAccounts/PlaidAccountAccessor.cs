@@ -349,7 +349,7 @@ namespace TooSimple_DataAccessors.Database.PlaidAccounts
             await connection.OpenAsync();
             using IDbTransaction transaction = connection.BeginTransaction();
 
-            string query = @"REPLACE INTO PlaidTransactions
+            string query = @"INSERT INTO PlaidTransactions 
                             (
                                 PlaidTransactionId
                                 , AccountOwner
@@ -426,7 +426,11 @@ namespace TooSimple_DataAccessors.Database.PlaidAccounts
                                 , @SpendingFromGoalId
                                 , @PlaidAccountId
                                 , @UserAccountId
-                                );";
+                                )
+								ON DUPLICATE KEY UPDATE
+								IsPending = @IsPending,
+								PendingTransactionId = @PendingTransactionId,
+								Amount = @Amount;";
 
             try
             {

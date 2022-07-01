@@ -39,6 +39,7 @@ namespace TooSimple_Poco.Models.DataModels
 		public string? TransactionType { get; set; }
 		public string? UnofficialCurrencyCode { get; set; }
 		public string? SpendingFromGoalId { get; set; }
+        public string? SpendingFromGoalName { get; set; }
 		public string? PlaidAccountId { get; set; }
         public string PlaidAccountDisplayName { get; set; } = string.Empty;
         public string? UserAccountId { get; set; }
@@ -47,7 +48,8 @@ namespace TooSimple_Poco.Models.DataModels
 
         public TransactionDataModel(
             PlaidTransaction plaidTransaction,
-            IEnumerable<PlaidAccount> plaidAccounts)
+            IEnumerable<PlaidAccount> plaidAccounts,
+            Goal? goal = null)
         {
             PlaidTransactionId = plaidTransaction.PlaidTransactionId;
             AccountOwner = plaidTransaction.AccountOwner;
@@ -83,6 +85,9 @@ namespace TooSimple_Poco.Models.DataModels
             TransactionType = plaidTransaction.TransactionType;
             UnofficialCurrencyCode = plaidTransaction.UnofficialCurrencyCode;
             SpendingFromGoalId = plaidTransaction.SpendingFromGoalId;
+            SpendingFromGoalName = goal is not null
+                ? goal.GoalName
+                : null;
             PlaidAccountId = plaidTransaction.PlaidAccountId;
 
             PlaidAccount? account = plaidAccounts

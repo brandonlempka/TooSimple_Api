@@ -118,6 +118,70 @@ namespace TooSimple_DataAccessors.Database.Transactions
         }
 
         /// <summary>
+        /// Retrieves single transaction by Plaid Transaction ID.
+        /// </summary>
+        /// <param name="plaidTransactionId">
+        /// ID of transaction to return.
+        /// </param>
+        /// <returns>
+        /// <see cref="PlaidTransaction"/>
+        /// </returns>
+        public async Task<PlaidTransaction?> GetPlaidTransactionByIdAsync(string plaidTransactionId)
+        {
+            using MySqlConnection connection = new(_connectionString);
+
+            await connection.OpenAsync();
+            string query = @"SELECT
+                                PlaidTransactionId
+                                , AccountOwner
+                                , Amount
+                                , AuthorizedDate
+                                , TransactionDate
+                                , CategoryId
+                                , PrimaryCategory
+                                , DetailedCategory
+                                , CurrencyCode
+                                , Address
+                                , City
+                                , Country
+                                , Latitude
+                                , Longitude
+                                , PostalCode
+                                , Region
+                                , StoreNumber
+                                , MerchantName
+                                , Name
+                                , PaymentChannel
+                                , ByOrderOf
+                                , Payee
+                                , Payer
+                                , PaymentMethod
+                                , PaymentProcessor
+                                , PpdId
+                                , Reason
+                                , ReferenceNumber
+                                , IsPending
+                                , PendingTransactionId
+                                , TransactionCode
+                                , TransactionType
+                                , UnofficialCurrencyCode
+                                , SpendingFromGoalId
+                                , PlaidAccountId
+                                , UserAccountId
+                            FROM PlaidTransactions
+                            WHERE PlaidTransactionId = @plaidTransactionId";
+
+            PlaidTransaction transaction = await connection.QueryFirstOrDefaultAsync<PlaidTransaction>(
+                query,
+                new
+                {
+                    plaidTransactionId
+                });
+
+            return transaction;
+        }
+
+        /// <summary>
         /// Updates a transaction spent from goal.
         /// </summary>
         /// <param name="requestModel">

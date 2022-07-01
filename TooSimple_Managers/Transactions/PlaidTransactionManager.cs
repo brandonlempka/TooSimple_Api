@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using TooSimple_DataAccessors.Database.PlaidAccounts;
 using TooSimple_DataAccessors.Database.Transactions;
+using TooSimple_Managers.Budgeting;
 using TooSimple_Poco.Models.ApiRequestModels;
 using TooSimple_Poco.Models.Database;
 using TooSimple_Poco.Models.DataModels;
@@ -14,12 +15,16 @@ namespace TooSimple_Managers.Transactions
     {
         private readonly IPlaidTransactionAccessor _transactionsAccessor;
         private readonly IPlaidAccountAccessor _plaidAccountAccessor;
+        private readonly IBudgetingManager _budgetingManager;
+
         public PlaidTransactionManager(
             IPlaidTransactionAccessor transactionsAccessor,
-            IPlaidAccountAccessor plaidAccountAccessor)
+            IPlaidAccountAccessor plaidAccountAccessor,
+            IBudgetingManager budgetingManager)
         {
             _transactionsAccessor = transactionsAccessor;
             _plaidAccountAccessor = plaidAccountAccessor;
+            _budgetingManager = budgetingManager;
         }
 
         /// <summary>
@@ -92,21 +97,37 @@ namespace TooSimple_Managers.Transactions
                 };
             }
 
-            DatabaseResponseModel databaseResponse = await _transactionsAccessor.UpdatePlaidTransactionAsync(requestModel);
-            if (!databaseResponse.Success)
+            PlaidTransaction? transaction = await _transactionsAccessor.GetPlaidTransactionByIdAsync(requestModel.PlaidTransactionId);
+
+            if (transaction is null)
             {
                 return new BaseHttpResponse
                 {
-                    ErrorMessage = databaseResponse.ErrorMessage ?? "Something went wrong while updating.",
-                    Status = HttpStatusCode.InternalServerError
+                    ErrorMessage = "Plaid transaction was not found.",
+                    Status = HttpStatusCode.NoContent
                 };
             }
 
-            return new BaseHttpResponse
+            DatabaseResponseModel databaseResponse = await _transactionsAccessor.UpdatePlaidTransactionAsync(requestModel);
+
+            if (!databaseResponse.Success)
             {
-                Status = HttpStatusCode.OK,
-                Success = true
+                return BaseHttpResponse.CreateResponseFromDb(databaseResponse);
+            }
+
+            FundingHistoryDataModel fundingHistoryDataModel = new()
+            {
+                Amount = transaction.Amount,
+                IsAutomatedTransfer = false,
+                SourceGoalId = string.IsNullOrWhiteSpace(requestModel.SpendingFromGoalId)
+                    ? transaction.SpendingFromGoalId
+                    : requestModel.SpendingFromGoalId,
+                TransferDate = DateTime.UtcNow,
             };
+
+            BaseHttpResponse response = await _budgetingManager.MoveMoneyAsync(fundingHistoryDataModel);
+
+            return response;
         }
 
         /// <summary>

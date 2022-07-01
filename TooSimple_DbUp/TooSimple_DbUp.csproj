@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="dbup-mysql" Version="4.5.0" />
+    <PackageReference Include="dbup-mysql" Version="4.6.0" />
   </ItemGroup>
 
 </Project>

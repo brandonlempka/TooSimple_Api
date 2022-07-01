@@ -95,7 +95,10 @@ namespace TooSimple_Managers.Budgeting
                 GoalAmount = goalTotal,
                 ExpenseAmount = expenseTotal,
                 ReadyToSpend = accountTotal - creditTotal - goalTotal - expenseTotal,
-                Transactions = plaidTransactions.Select(transaction => new TransactionDataModel(transaction, accounts)),
+                Transactions = plaidTransactions.Select(transaction => new TransactionDataModel(
+                    transaction,
+                    accounts,
+                    goals.FirstOrDefault(goal => goal.GoalId == transaction.SpendingFromGoalId))),
                 Goals = goals
                     .Where(goal => !goal.IsArchived)
                     .Select(goal => new GoalDataModel(goal)),
@@ -131,12 +134,6 @@ namespace TooSimple_Managers.Budgeting
 
                 return invalidResponse;
             }
-
-            BaseHttpResponse serverError = new()
-            {
-                ErrorMessage = "Something went wrong while retrieving goals.",
-                Status = HttpStatusCode.InternalServerError,
-            };
 
             FundingHistory fundingHistory = new(fundingHistoryDataModel)
             {
